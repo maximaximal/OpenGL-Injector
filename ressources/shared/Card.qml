@@ -48,19 +48,11 @@ Item {
     ]
     transitions: [
 	Transition {
-	    ParallelAnimation {
-		PropertyAnimation {
-		    properties: "width,x,y,origin.x,origin.y"
-		    easing.type: Easing.InOutQuad
-		    duration: 1000
-		}
-		RotationAnimation {
-		    duration: 1000
-		}
+	    RotationAnimation {
+		duration: 1000
 	    }
 	}
     ]
-
 
     Image {
 	id: cover
@@ -76,18 +68,6 @@ Item {
 		z: 0
 	    }
 	    angle: 0
-	}
-    }
-    onCurrentCardChanged: function(focus) {
-	if(currentCard === ownIndex) {
-	    root.state = ""
-	}
-	else if(currentCard > ownIndex) {
-	    // Left side!
-	    root.state = "collapsedLeft";
-	} else {
-	    // Right side!
-	    root.state = "collapsedRight";
 	}
     }
 }

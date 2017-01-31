@@ -1,7 +1,7 @@
 import QtQuick 2.2
 import QtQuick.Window 2.2
 import QtQuick.Scene3D 2.0
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.3
 
 import net.piga.overlay 1.0
 
@@ -13,12 +13,39 @@ Item {
     ColumnLayout {
 	anchors.fill: parent
 
-	CardDrawer {
-	    Layout.alignment: Qt.AlignCenter
-
-	    centerCardWidth: Screen.width / 4
+	HeaderBar {
+	    id: headerBar
 	    
-	    height: (Screen.height / 3) * 2 // 2/3 of the screen should be covered.
+	    Layout.fillWidth: true
+	    Layout.preferredHeight: Screen.height / 6
+
+	    KeyNavigation.down: cardDrawer
+	    KeyNavigation.priority: KeyNavigation.BeforeItem
+
+	    onChangeState: {
+		console.log(name)
+	    }
+	}
+	StackLayout {
+	    currentIndex: 0
+
+	    id: menuArea
+
+	    width: Screen.width
+	    height: Screen.height / 6 * 5
+	    Layout.fillWidth: true
+	    
+	    CardDrawer {
+		id: cardDrawer
+		Layout.alignment: Qt.AlignCenter
+
+		centerCardWidth: menuArea.width / 4
+		Layout.preferredWidth: menuArea.width
+		Layout.preferredHeight: menuArea.height / 3 * 2
+
+		KeyNavigation.up: headerBar
+		KeyNavigation.priority: KeyNavigation.BeforeItem
+	    }
 	}
     }
 

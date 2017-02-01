@@ -1,94 +1,133 @@
-import QtQuick 2.0
+import QtQuick 2.1
+import QtQuick.Layouts 1.1
 
 Item {
     id: root
 
-    property int centerCardWidth: 400
-    property int centerCardHeight: root.height * 0.95
-    property int collapsedCardWidth: 90
+    property int expandedCoverWidth: root.width / 4
 
-    onActiveFocusChanged: function(focus) {
+    onActiveFocusChanged: {
 	if(focus) 
-	    cardList.focus = true
+	    coverflow.focus = true
     }
-
-    Component {
-        id: cardDelegate
-
-        Card {
-            id: card
-            gameName: name
-            gameColor: "purple"
-
-	    width: centerCardWidth
-	    height: centerCardHeight
-
-	    expandedWidth: centerCardWidth
-	    collapsedWidth: collapsedCardWidth
-
-	    numberOfCards: cardList.count
-	    currentCard: cardList.currentIndex
-	    ownIndex: index
-        }
-    }
-
-    ListView {
-        id: cardList
-
-        model: testModel
-
+    
+    ColumnLayout {
+	id: rootLayout
 	anchors.fill: parent
-        delegate: cardDelegate
-	spacing: 10
 
-	orientation: Qt.Horizontal
-        layoutDirection: Qt.LeftToRight
+	ListView {
+	    id: coverflow
 
-	focus: true
+	    Layout.alignment: Qt.AlignCenter
 
-	highlightMoveDuration: 400
-	preferredHighlightBegin: width / 2 - centerCardWidth / 2
-	preferredHighlightEnd: width / 2 + centerCardWidth / 2
-	highlightRangeMode: ListView.StrictlyEnforceRange
+	    Layout.preferredHeight: root.height / 4 * 3
+	    Layout.fillWidth: true
+	    spacing: - root.width / 16
 
-	onCurrentIndexChanged: {
-	    if(currentIndex > 0) 
-		cardList.contentItem.children[currentIndex - 1].state = "collapsedLeft"
-	    if(currentIndex < testModel.count - 1)
-		cardList.contentItem.children[currentIndex + 1].state = "collapsedRight"
+	    orientation: Qt.Horizontal
 
+	    model: games
 
-	    cardList.contentItem.children[currentIndex].state = ""
-	}
+	    focus: true
 
-	highlight: Component {
-	    Rectangle {
-		width: 100
-		height: 100
-		color: "green"
+	    highlightMoveDuration: 800
+	    highlightResizeDuration: 800
+	    highlightMoveVelocity: 100
+	    highlightResizeVelocity: 100
+	    preferredHighlightBegin: width / 2 - expandedCoverWidth / 2
+	    preferredHighlightEnd: width / 2 + expandedCoverWidth / 2
+	    highlightRangeMode: ListView.StrictlyEnforceRange
+	    highlightFollowsCurrentItem: true
 
-		Behavior on x {
-		    NumberAnimation {
-			easing.type: Easing.InOutQuad
-			duration: 1000
+	    delegate: Item {
+
+		width: expandedCoverWidth
+
+		height: root.height / 4 * 3
+
+		Image {
+		    id: coverImage
+		    source: activeFocus ? coverUrl : "https://www.trythisforexample.com/images/example_logo.png"
+
+		    anchors.centerIn: parent
+		    width: parent.width
+		    height: parent.height
+
+		    transform: Rotation {
+			id: coverImageRotation
+			origin.x: {
+			    if(index < coverflow.currentIndex) {
+				return coverImage.x
+			    } else if(coverflow.currentIndex < index) {
+				return coverImage.x + coverImage.width
+			    } else {
+				return coverImage.x + coverImage.width / 2
+			    }
+			}
+			origin.y: coverImage.y + coverImage.height / 2
+			axis {x: 0; y: 1; z: 0}
+			angle: {
+			    if(index < coverflow.currentIndex) {
+				return 30
+			    } else if(coverflow.currentIndex < index) {
+				return -30
+			    } else {
+				return 0
+			    }
+			}
+
+			Behavior on angle {
+			    RotationAnimation {
+				duration: 600
+				easing.type: Easing.InOutQuad
+			    }
+			}
+			Behavior on origin.x {
+			    NumberAnimation {
+				duration: 600
+				easing.type: Easing.InOutQuad
+			    }
+			}
+		    }
+		    Behavior on width {
+			NumberAnimation {
+			    duration: 600
+			}
 		    }
 		}
 	    }
 	}
     }
+    
     ListModel {
-        id: testModel
-        ListElement {
-            name: "Bill Smith"
-            number: "555 3264"
-        }
-        ListElement {
-            name: "John Brown"
-            number: "555 8426"
-        }
-        ListElement {
-            name: "Sam Wise"
-            number: "555 0473"
-        }
+	id: games
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
+	ListElement {
+	    name: qsTr("Gamename")
+	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	}
     }
 }

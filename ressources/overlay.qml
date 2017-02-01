@@ -39,7 +39,6 @@ Item {
 		id: cardDrawer
 		Layout.alignment: Qt.AlignCenter
 
-		centerCardWidth: menuArea.width / 4
 		Layout.preferredWidth: menuArea.width
 		Layout.preferredHeight: menuArea.height / 3 * 2
 

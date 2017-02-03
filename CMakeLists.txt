@@ -21,7 +21,6 @@ set(HDRS
 set(RSCS
     ${RSC}/overlay.qml
     ${RSC}/shared/NotificationItem.qml
-    ${RSC}/shared/Card.qml
     ${RSC}/shared/CardDrawer.qml
 )
 
@@ -36,7 +35,7 @@ include_directories(${HDR})
 find_package(Qt5Widgets)
 find_package(Qt5Qml)
 find_package(Qt5Quick)
-find_package(Qt5DCore)
+find_package(Qt53DCore)
 find_package(Qt5DRender)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

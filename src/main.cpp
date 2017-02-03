@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     engine.rootContext()->setContextProperty("Overlay", &overlay);
     
     qmlRegisterType<piga::overlay::Notification>("net.piga.overlay", 1, 0, "Notification");
-    
+
     // Set the format
     QSurfaceFormat format;
     if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {

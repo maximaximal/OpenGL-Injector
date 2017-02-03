@@ -27,8 +27,9 @@ Item {
 	    orientation: Qt.Horizontal
 
 	    model: games
-
 	    focus: true
+
+	    currentIndex: games.count / 2
 
 	    highlightMoveDuration: 800
 	    highlightResizeDuration: 800
@@ -97,6 +98,38 @@ Item {
 		}
 	    }
 	}
+	Rectangle {
+	    Layout.preferredHeight: root.height / 4
+	    Layout.fillWidth: true
+	    color: "transparent"
+	    HeaderText {
+		id: gameName
+		anchors.top: parent.top
+		anchors.left: parent.left
+		anchors.right: parent.right
+		text: games.get(coverflow.currentIndex).name
+		font.pointSize: 50
+		font.bold: true
+		color: "darkgrey"
+		horizontalAlignment: Text.AlignHCenter
+	    }
+	    GridLayout {
+		id: gameInfo
+		anchors.top: gameName.bottom
+		anchors.left: parent.left
+		anchors.right: parent.right
+		anchors.bottom: parent.bottom
+		columns: 2
+		Author {
+		    id: gameAuthor
+		    Layout.preferredWidth: parent.width / 3
+		    Layout.maximumWidth: parent.width / 2
+		    Layout.margins: 20
+		    width: parent.width / 2
+		    author: games.get(coverflow.currentIndex).author
+		}
+	    }
+	}
     }
     
     ListModel {
@@ -104,30 +137,37 @@ Item {
 	ListElement {
 	    name: qsTr("Gamename")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "Hello"
 	}
 	ListElement {
-	    name: qsTr("Gamename")
+	    name: qsTr("Gamename 2")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "World"
 	}
 	ListElement {
-	    name: qsTr("Gamename")
+	    name: qsTr("Gamename 3")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "LOL"
 	}
 	ListElement {
-	    name: qsTr("Gamename")
+	    name: qsTr("Gamename 4")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "This"
 	}
 	ListElement {
-	    name: qsTr("Gamename")
+	    name: qsTr("Gamename 5")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "Is"
 	}
 	ListElement {
-	    name: qsTr("Gamename")
+	    name: qsTr("Gamename 6")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "Awesome"
 	}
 	ListElement {
-	    name: qsTr("Gamename")
+	    name: qsTr("Gamename 7")
 	    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/8/84/Example.svg"
+	    author: "Exclamation"
 	}
     }
 }

@@ -6,6 +6,8 @@ import QtQuick.Controls.Styles 1.4
 ColumnLayout {
     id: root
     anchors.fill: parent
+
+    property var globalState: "menuGames"
     signal changeState(var name)
 
     onActiveFocusChanged: {
@@ -16,7 +18,7 @@ ColumnLayout {
     ListView {
 	Layout.alignment: Qt.AlignCenter
 	
-	Layout.minimumWidth: 200 * 3 + 40
+	Layout.minimumWidth: 300 * 3 + 40
         Layout.preferredHeight: 40
 	spacing: 20
 
@@ -24,23 +26,31 @@ ColumnLayout {
 
 	id: headerMenuList
 	orientation: Qt.Horizontal
+	state: currentIndex
+
+	Component.onCompleted: {
+	    currentIndex = 0
+	    changeState("menuGames")
+	}
 
 	model: headerActions
 	delegate: Item {
-	    width: 200
+	    width: 300
 	    height: 40
 
 	    id: headerMenuDelegateItem
-	    Text {
+	    HeaderText {
 		id: headerMenuDelegateText
 		text: name
 		anchors.centerIn: parent
+		font.pointSize: 30
 	    }
 
 	    onActiveFocusChanged: {
 		if(headerMenuList.currentIndex === index) {
 		    headerMenuDelegateItem.state = "selected"
 		    changeState(targetState)
+		    globalState = targetState
 		}
 		else 
 		    headerMenuDelegateItem.state = ""
@@ -52,7 +62,7 @@ ColumnLayout {
 		    PropertyChanges {
 			target: headerMenuDelegateText
 			font.bold: true
-			font.pointSize: 20
+			font.pointSize: 40
 		    }
 		}
 	    ]

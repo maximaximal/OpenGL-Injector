@@ -28,6 +28,7 @@ ColumnLayout {
 	orientation: Qt.Horizontal
 	state: currentIndex
 
+
 	Component.onCompleted: {
 	    currentIndex = 0
 	    changeState("menuGames")
@@ -44,6 +45,13 @@ ColumnLayout {
 		text: name
 		anchors.centerIn: parent
 		font.pointSize: 30
+	    }
+
+	    state: {
+		if(headerMenuList.currentIndex === index) {
+		    return "selected"
+		}
+		return ""
 	    }
 
 	    onActiveFocusChanged: {

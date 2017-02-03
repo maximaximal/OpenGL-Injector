@@ -46,9 +46,7 @@ Item {
 	    focus: true
 
 	    CardDrawer {
-		Component.onCompleted: {
-		    console.log("CardDrawer")
-		}
+		property int step: 0
 		id: cardDrawer
 
 		width: Screen.width
@@ -58,6 +56,7 @@ Item {
 		KeyNavigation.priority: KeyNavigation.BeforeItem
 	    }
 	    Settings {
+		property int step: 1
 		id: settings
 
 		width: Screen.width
@@ -65,11 +64,14 @@ Item {
 
 		KeyNavigation.up: headerBar
 		KeyNavigation.priority: KeyNavigation.BeforeItem
+
+		// Opacity to 0 because of initial state.
+		opacity: 0
 	    }
 
 	    delegate: StackViewDelegate {
 		function getTransition(properties) {
-		    if(properties.enterItem.Stack.index < properties.exitItem.Stack.index) {
+		    if(properties.enterItem.step < properties.exitItem.step) {
 			return leftToRight
 		    } else {
 			return rightToLeft

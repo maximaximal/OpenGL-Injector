@@ -1,62 +1,44 @@
 cmake_minimum_required(VERSION 3.1)
-project(Pigaco-Overlay)
+project(piga-overlay)
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/CMake")
+set(PIGA_OVERLAY_MAJOR_VERSION 0)
+set(PIGA_OVERLAY_MINOR_VERSION 3)
+set(PIGA_OVERLAY_PATCH_VERSION 0)
+set(PIGA_OVERLAY_TWEAK_VERSION 0)
 
-set(SRC "${PROJECT_SOURCE_DIR}/src")
-set(HDR "${PROJECT_SOURCE_DIR}/include")
-set(RSC "${PROJECT_SOURCE_DIR}/ressources")
+set(SRC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(HDR "${CMAKE_CURRENT_SOURCE_DIR}/include/piga/overlay")
 
-set(SRCS
-    ${SRC}/main.cpp
-    ${SRC}/Overlay.cpp
-    ${SRC}/Notification.cpp
-)
+set(OVERLAY_SRCS
+    ${SRC}/Applications.cpp
+    ${SRC}/OverlayPlugin.cpp
+    )
+set(OVERLAY_HDRS
+    ${HDR}/Applications.hpp
+    ${HDR}/OverlayPlugin.hpp
+    )
 
-set(HDRS
-    ${HDR}/overlay/Overlay.hpp
-    ${HDR}/overlay/Notification.hpp
-)
-
-set(RSCS
-    ${RSC}/overlay.qml
-    ${RSC}/shared/NotificationItem.qml
-    ${RSC}/shared/CardDrawer.qml
-)
-
-set(FORS
-
-)
-
+set(OVERLAY_RSC "${CMAKE_CURRENT_SOURCE_DIR}/overlay.qrc")
 
 include_directories(${HDR})
 
-# Find Qt
-find_package(Qt5Widgets)
-find_package(Qt5Qml)
-find_package(Qt5Quick)
-find_package(Qt53DCore)
-find_package(Qt5DRender)
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 # Compatability with Wt and boost
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+add_definitions(-DQT_NO_KEYWORDS)
 
-add_executable(pigaoverlay ${SRCS} ${HDRS} ${RSCS} ${FORS})
+# Qt Plugin
+add_definitions(-DQT_PLUGIN)
+add_definitions(-DQT_NO_DEBUG)
 
-qt5_use_modules(pigaoverlay Widgets Qml Quick 3DCore 3DRender 3DExtras 3DInput)
+configure_file(${HDR}/Config.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/PigaOverlayConfig.hpp)
 
-set_property(TARGET pigaoverlay PROPERTY CXX_STANDARD_REQUIRED 14)
+add_library(piga-overlay STATIC ${OVERLAY_SRCS} ${OVERLAY_HDRS} ${OVERLAY_RSC})
 
-# Installation
-install(TARGETS pigaoverlay
-    EXPORT PigaOverlayConfig
-    ARCHIVE  DESTINATION lib
-    LIBRARY  DESTINATION lib
-    RUNTIME  DESTINATION /usr/lib/piga/apps/pigaoverlay/)
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY ressources/ DESTINATION /usr/lib/piga/apps/pigaoverlay/)
-install(EXPORT PigaOverlayConfig DESTINATION lib/cmake)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/app_config.cfg DESTINATION /usr/lib/piga/apps/pigaoverlay/)
+target_include_directories(piga-overlay PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+qt5_use_modules(piga-overlay Widgets Qml Quick Sql)
+
+set_property(TARGET piga-overlay PROPERTY CXX_STANDARD_REQUIRED 14)

@@ -4,10 +4,6 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 1.4
 
-import net.piga.overlay 1.0
-
-import "shared"
-
 Item {
     property real defaultSpacing: 10
 

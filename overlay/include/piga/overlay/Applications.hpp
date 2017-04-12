@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <QAbstractListModel>
-#include <QSqlQuery>
 
 namespace piga
 {
@@ -39,8 +38,6 @@ public:
 
 private:
     QList<Application> m_apps;
-
-    QSqlQuery m_selectApplications;
 };
 }
 }

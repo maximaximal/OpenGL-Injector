@@ -1,4 +1,3 @@
-#include <QSqlDatabase>
 #include <QDebug>
 #include <piga/overlay/Applications.hpp>
 
@@ -11,23 +10,6 @@ namespace overlay
 Applications::Applications(QObject *parent)
     : QAbstractListModel(parent)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("SQLITE");
-
-    QString databaseName = std::getenv("PIGA_DAEMON_APPDB_PATH");
-    db.setDatabaseName(databaseName);
-
-    qDebug() << "The appdb name is" << databaseName;
-
-    bool ok = db.open();
-
-    if(ok)
-	qDebug() << "Successfully opened the database " << databaseName;
-    else
-	qDebug() << "Successfully opened the database " << databaseName;
-
-    // Prepare queries.
-    m_selectApplications.setForwardOnly(true);
-    m_selectApplications.prepare("SELECT name,description,author,version FROM `applications`");	
 
     // Update data.
     updateData();
@@ -64,17 +46,6 @@ QVariant Applications::data(const QModelIndex &index, int role) const
 }
 void Applications::updateData()
 {
-    QSqlDatabase db = QSqlDatabase::database();
-    m_selectApplications.exec();
-
-    while(m_selectApplications.next()) {
-	m_apps.append({
-		m_selectApplications.value(0).toString(), // Name
-		m_selectApplications.value(1).toString(), // Description
-		m_selectApplications.value(2).toString(), // Author
-		m_selectApplications.value(3).toString(), // Version
-	    });
-    }
 }
 }
 }

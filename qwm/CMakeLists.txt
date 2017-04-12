@@ -28,7 +28,7 @@ add_executable(piga-qwm ${QWM_SRCS} ${QWM_RSC})
 
 target_include_directories(piga-qwm PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-qt5_use_modules(piga-qwm WaylandCompositor Widgets Qml Quick Sql)
+qt5_use_modules(piga-qwm WaylandCompositor Widgets Qml Quick)
 
 set_property(TARGET piga-qwm PROPERTY CXX_STANDARD_REQUIRED 14)
 

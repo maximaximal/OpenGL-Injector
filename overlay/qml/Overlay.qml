@@ -6,6 +6,7 @@ import QtQuick.Controls 1.4
 
 Item {
     property real defaultSpacing: 10
+    anchors.fill: parent
 
     ColumnLayout {
 	anchors.fill: parent

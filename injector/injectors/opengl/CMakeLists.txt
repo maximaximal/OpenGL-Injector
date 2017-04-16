@@ -1,0 +1,3 @@
+set(OPENGL_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/opengl.c
+    PARENT_SCOPE)

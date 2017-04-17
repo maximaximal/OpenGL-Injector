@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "lua_utils.h"
+
 #include <cairo/cairo.h>
 
 struct piga_injector_handle_t *injector_handle = 0;
@@ -31,8 +33,12 @@ struct piga_injector_handle_t*  piga_injector_init()
     injector_handle = malloc(sizeof(struct piga_injector_handle_t));
     injector_handle->libGL_path = 0;
     injector_handle->libGLX_path = 0;
+    injector_handle->window_width = 0;
+    injector_handle->window_height = 0;
     injector_handle->status = 0;
     injector_handle->L = 0;
+    injector_handle->cairo_cr = 0;
+    injector_handle->cairo_surface = 0;
     
     injector_handle->L = luaL_newstate();
     if(!injector_handle->L) {
@@ -55,13 +61,30 @@ struct piga_injector_handle_t*  piga_injector_init()
     luaL_loadfile(injector_handle->L, config_file);
     int ret = lua_pcall(injector_handle->L, 0, 0, 0);
     if (ret != 0) {
-	fprintf(stderr, "%s\n", lua_tostring(injector_handle->L, -1));
+	printf("%s\n", lua_tostring(injector_handle->L, -1));
 	injector_handle->status |= PIGA_INJECTOR_ERROR_IN_CONFIG_LUA;
 	return injector_handle;
     }
     free(config_file);
 
+    // Configuration variables.
+    injector_handle->libGL_path = get_global_str(injector_handle->L, "libGL_path");
+    injector_handle->libGLX_path = get_global_str(injector_handle->L, "libGLX_path");
+
     return injector_handle;
+}
+
+void piga_injector_draw()
+{
+    if(injector_handle->cairo_surface == 0) {
+	cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+				   injector_handle->window_width,
+				   injector_handle->window_height);
+    }
+
+    if(injector_handle->cairo_cr == 0) {
+	injector_handle->cairo_cr = cairo_create(injector_handle->cairo_surface);
+    }
 }
 
 char* piga_injector_combine_path(const char *p1, const char *p2)

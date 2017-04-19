@@ -20,7 +20,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 find_package(Lua REQUIRED)
 
 set(CMAKE_EXE_LINKER_FLAGS " -static")
-target_link_libraries(piga-injector -static-libgcc -static-libstdc++)
+target_link_libraries(piga-injector -static-libgcc -static-libstdc++ m)
 
 target_include_directories(piga-injector PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/injectors)
 

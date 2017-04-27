@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <EGL/egl.h>
 #include <GL/glx.h>
 
@@ -49,6 +50,10 @@ typedef void (*glDeleteProgram_ptr_t)(GLuint program);
 typedef GLint (*glGetAttribLocation_ptr_t)(GLuint program, const GLchar *name);
 typedef GLint (*glGetUniformLocation_ptr_t)(GLuint program, const GLchar *name);
 typedef void (*glGenTextures_ptr_t)(GLsizei size, GLuint *textures);
+typedef void (*glGenBuffers_ptr_t)(GLsizei size, GLuint *buffers);
+typedef void (*glGenVertexArrays_ptr_t)(GLsizei size, GLuint *vaos);
+typedef void (*glBufferData_ptr_t)(GLenum target, GLsizei size, const GLvoid *data, GLenum usage);
+typedef void (*glBufferSubData_ptr_t)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data);
 typedef void (*glTexImage2D_ptr_t)(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid * data);
 typedef void (*glUniform1i_ptr_t)(GLint location, GLint v0);
 typedef void (*glVertexAttribPointer_ptr_t)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
@@ -100,16 +105,26 @@ glDeleteProgram_ptr_t glDeleteProgram_ptr;
 glGetAttribLocation_ptr_t glGetAttribLocation_ptr;
 glGetUniformLocation_ptr_t glGetUniformLocation_ptr;
 glGenTextures_ptr_t glGenTextures_ptr;
+glGenBuffers_ptr_t glGenBuffers_ptr;
+glGenVertexArrays_ptr_t glGenVertexArrays_ptr;
+glBufferData_ptr_t glBufferData_ptr;
+glBufferSubData_ptr_t glBufferSubData_ptr;
 glTexImage2D_ptr_t glTexImage2D_ptr;
 glUniform1i_ptr_t glUniform1i_ptr;
 glVertexAttribPointer_ptr_t glVertexAttribPointer_ptr;
 glEnableVertexAttribArray_ptr_t glEnableVertexAttribArray_ptr;
 
+bool gl_shader_initialized;
+bool gl_program_initialized;
 GLuint gl_vertex_shader;
 GLuint gl_fragment_shader;
 GLuint gl_program;
 GLuint gl_texture;
-GLuint gl_texture_uniform_texture;
+GLint gl_position;
+GLint gl_texture_uniform_texture;
+GLint gl_texture_uniform_texcoord;
+GLuint gl_vbo;
+GLuint gl_vao;
 
 struct GLStateBank
 {

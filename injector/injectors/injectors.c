@@ -137,7 +137,7 @@ void piga_injector_draw()
 
     // Begin drawing.
     cairo_set_source_rgb(injector_handle->cairo_cr, 0.0, 0.0, 0.0);
-    cairo_paint(injector_handle->cairo_cr);
+    cairo_paint_with_alpha(injector_handle->cairo_cr, 0.5);
 
     cairo_surface_flush(injector_handle->cairo_surface);
 

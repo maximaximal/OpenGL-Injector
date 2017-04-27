@@ -7,14 +7,14 @@
 #include <dlfcn.h>
 
 static const GLfloat squareVertices[] = {
-    -10.0f, -1.0f,
+    -1.0f, -1.0f,
     1.0f, -1.0f,
     -1.0f,  1.0f,
     1.0f,  1.0f,
 };
 
 static const GLfloat textureVertices[] = {
-    10.0f, 1.0f,
+    1.0f, 1.0f,
     1.0f, 0.0f,
     0.0f,  1.0f,
     0.0f,  0.0f,
@@ -234,6 +234,20 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
     }
 
     if(glGetBooleanv_ptr == 0) {
+        // Reset GL variables.
+        gl_vertex_shader = 0;
+        gl_fragment_shader = 0;
+        gl_program = 0;
+        gl_position = 0;
+        gl_texture = 0;
+        gl_texture_uniform_texture = 0;
+        gl_texture_uniform_texcoord = 0;
+        gl_vbo = 0;
+        gl_vao = 0;
+
+        gl_shader_initialized = false;
+        gl_program_initialized = false;
+        
         // Receive all OpenGL functions.
         glGetBooleanv_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetBooleanv");
         CHECK_GL_FUNC_PTR(glGetBooleanv_ptr)
@@ -291,6 +305,14 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
         CHECK_GL_FUNC_PTR(glGetUniformLocation_ptr)
         glGenTextures_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGenTextures");
         CHECK_GL_FUNC_PTR(glGenTextures_ptr)
+        glGenBuffers_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGenBuffers");
+        CHECK_GL_FUNC_PTR(glGenBuffers_ptr)
+        glGenVertexArrays_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGenVertexArrays");
+        CHECK_GL_FUNC_PTR(glGenVertexArrays_ptr)
+        glBufferData_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBufferData");
+        CHECK_GL_FUNC_PTR(glBufferData_ptr)
+        glBufferSubData_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBufferSubData");
+        CHECK_GL_FUNC_PTR(glBufferSubData_ptr)
         glTexImage2D_ptr = glXGetProcAddress_ptr((const unsigned char*) "glTexImage2D");
         CHECK_GL_FUNC_PTR(glTexImage2D_ptr)
         glUniform1i_ptr = glXGetProcAddress_ptr((const unsigned char*) "glUniform1i");
@@ -308,7 +330,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 
     normalizeGLState();
     
-    if(gl_vertex_shader == 0) {
+    if(!gl_shader_initialized) {
         // Check the version.
         GLint major, minor;
         glGetIntegerv_ptr(GL_MAJOR_VERSION, &major);
@@ -317,19 +339,19 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
         
         gl_vertex_shader = piga_opengl_make_shader(GL_VERTEX_SHADER,
                                                    handle->vertex_shader);
-    }
-    if(gl_fragment_shader == 0) {
-        gl_vertex_shader = piga_opengl_make_shader(GL_VERTEX_SHADER,
+
+        gl_fragment_shader = piga_opengl_make_shader(GL_FRAGMENT_SHADER,
                                                    handle->fragment_shader);
+
+        gl_shader_initialized = true;
     }
 
-    if(gl_program == 0 && gl_vertex_shader != 0 && gl_fragment_shader != 0) {
+    if(gl_shader_initialized && !gl_program_initialized) {
         gl_program = piga_opengl_make_program(gl_vertex_shader, gl_fragment_shader);
 
-        // Assign texture
-        gl_texture = glGetUniformLocation_ptr(gl_program, "tex");
+        printf("Read shaders and linked program.\n");
 
-        printf("Read shaders, linked program and received the \"texture\" uniform.\n");
+        gl_program_initialized = true;
     }
 
     piga_injector_draw();
@@ -338,9 +360,41 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
     glUseProgram_ptr(gl_program);
 
     if(gl_texture == 0) {
+        // Generate the VAO.
+        glGenVertexArrays_ptr(1, &gl_vao);
+        glBindVertexArray_ptr(gl_vao);
+        
+        // Generate the VBO.
+        glGenBuffers_ptr(1, &gl_vbo);
+        glBindBuffer_ptr(GL_ARRAY_BUFFER, gl_vbo);
+        glBufferData_ptr(GL_ARRAY_BUFFER, sizeof(squareVertices) + sizeof(textureVertices), squareVertices, GL_STATIC_DRAW);
+        glBufferSubData_ptr(GL_ARRAY_BUFFER, sizeof(squareVertices), sizeof(textureVertices), textureVertices);
+
+        // Assign the VBO.
+        gl_position = glGetAttribLocation_ptr(gl_program, "position");
+        if(gl_position < 0) {
+            printf("No attrib \"position\"!\n");
+        }
+        glVertexAttribPointer_ptr(gl_position, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray_ptr(gl_position);
+
         // Assign a texture.
         glGenTextures_ptr(1, &gl_texture);
-        gl_texture_uniform_texture = glGetUniformLocation_ptr(gl_program, "texture");
+        glBindTexture_ptr(GL_TEXTURE_2D, gl_texture);
+
+        gl_texture_uniform_texcoord = glGetAttribLocation_ptr(gl_program, "texcoord");
+        if(gl_texture_uniform_texcoord < 0) {
+            printf("No attrib \"texcoord\"!\n");
+        }
+        glVertexAttribPointer_ptr(gl_texture_uniform_texcoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *)sizeof(squareVertices));
+        glEnableVertexAttribArray_ptr(gl_texture_uniform_texture);
+
+        gl_texture_uniform_texture = glGetUniformLocation_ptr(gl_program, "tex");
+        if(gl_texture_uniform_texture < 0) {
+            printf("No uniform \"tex\"!\n");
+        }
+        glActiveTexture(GL_TEXTURE0 + gl_texture);
+        glUniform1i_ptr(gl_texture_uniform_texture, gl_texture);
     }
     if(gl_texture != 0 && handle->draw_request) {
         // Upload the cairo surface to opengl.
@@ -349,24 +403,29 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
             goto exit_return;
         }
         
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture_ptr(GL_TEXTURE_RECTANGLE_ARB, gl_texture);
+        
+        glBindVertexArray_ptr(gl_vao);
+        glEnableVertexAttribArray_ptr(gl_texture_uniform_texcoord);
+        glActiveTexture(GL_TEXTURE0 + gl_texture);
+        glBindTexture_ptr(GL_TEXTURE_2D, gl_texture);
+
+        glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
         glTexImage2D_ptr(GL_TEXTURE_2D, 0, GL_RGBA,
                          handle->window_width, handle->window_height,
                          0, GL_BGRA, GL_UNSIGNED_BYTE, handle->cairo_data);
-        glUniform1i_ptr(gl_texture_uniform_texture, 0);
 
 
-        glEnableVertexAttribArray_ptr(ATTRIB_VERTEX);
-        glVertexAttribPointer_ptr(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, squareVertices);
-        GLint texAttrib = glGetAttribLocation_ptr(gl_program, "texcoord");
-        glEnableVertexAttribArray_ptr(texAttrib);
-        glVertexAttribPointer_ptr(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, textureVertices);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray_ptr(0);
+        glBindBuffer_ptr(GL_ARRAY_BUFFER, 0);
+        glBindTexture_ptr(GL_TEXTURE_2D, 0);
     }
     
 exit_return:
+    glUseProgram_ptr(0);
     resetGLState();
 
     glXSwapBuffers_ptr(dpy, drawable);

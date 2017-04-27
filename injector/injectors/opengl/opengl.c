@@ -1,130 +1,31 @@
 #include "../injectors.h"
 #include "opengl.h"
+#include "shaders.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
 
-typedef void (*glXSwapBuffers_ptr_t)(Display *dpy, GLXDrawable);
-typedef void* (*glXGetProcAddress_ptr_t)(const GLubyte *procName);
-
-typedef void (*glGetIntegerv_ptr_t)(GLenum pname, GLint *v);
-typedef void (*glGetFloatv_ptr_t)(GLenum pname, GLfloat *v);
-typedef void (*glGetBooleanv_ptr_t)(GLenum pname, GLboolean *v);
-
-typedef void (*glEnable_ptr_t)(GLenum pname);
-typedef void (*glDisable_ptr_t)(GLenum pname);
-typedef GLboolean (*glIsEnabled_ptr_t)(GLenum pname);
-typedef GLboolean (*glIsEnabledi_ptr_t)(GLenum pname, GLuint index);
-
-typedef void (*glActiveTexture_ptr_t)(GLenum texture);
-typedef void (*glUseProgram_ptr_t)(GLuint program);
-typedef void (*glBlendColor_ptr_t)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-typedef void (*glFrontFace_ptr_t)(GLenum mode);
-typedef void (*glColorMask_ptr_t)(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-typedef void (*glColorMaski_ptr_t)(GLuint buf, GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
-typedef void (*glBlendFunc_ptr_t)(GLenum sfactor, GLenum dfactor);
-typedef void (*glBindFramebuffer_ptr_t)(GLenum target, GLuint framebuffer);
-typedef void (*glBindTexture_ptr_t)(GLenum target, GLuint texture);
-typedef void (*glBindSampler_ptr_t)(GLuint unit, GLuint sampler);
-typedef void (*glBindBuffer_ptr_t)(GLenum target, GLuint buffer);
-typedef void (*glBindVertexArray_ptr_t)(GLuint array);
-typedef void (*glPolygonMode_ptr_t)(GLenum face, GLenum mode);
-typedef void (*glTexParameterf_ptr_t)(GLenum target, GLenum pname, GLfloat param);
-typedef void (*glTexParameteri_ptr_t)(GLenum target, GLenum pname, GLint param);
-typedef void (*glPixelStoref_ptr_t)(GLenum pname, GLfloat param);
-typedef void (*glPixelStorei_ptr_t)(GLenum pname, GLint param);
-
-void * opengl_glx_handle = 0;
-
-glXSwapBuffers_ptr_t glXSwapBuffers_ptr = 0;
-glXGetProcAddress_ptr_t glXGetProcAddress_ptr = 0;
-
-glGetIntegerv_ptr_t glGetIntegerv_ptr = 0;
-glGetBooleanv_ptr_t glGetBooleanv_ptr = 0;
-glGetFloatv_ptr_t glGetFloatv_ptr = 0;
-
-glEnable_ptr_t glEnable_ptr = 0;
-glDisable_ptr_t glDisable_ptr = 0;
-glIsEnabled_ptr_t glIsEnabled_ptr = 0;
-glIsEnabledi_ptr_t glIsEnabledi_ptr = 0;
-
-glActiveTexture_ptr_t glActiveTexture_ptr = 0;
-glBindBuffer_ptr_t glBindBuffer_ptr = 0;
-glBindFramebuffer_ptr_t glBindFramebuffer_ptr = 0;
-glBindSampler_ptr_t glBindSampler_ptr = 0;
-glBindTexture_ptr_t glBindTexture_ptr = 0;
-glBindVertexArray_ptr_t glBindVertexArray_ptr = 0;
-glBlendColor_ptr_t glBlendColor_ptr = 0;
-glBlendFunc_ptr_t glBlendFunc_ptr = 0;
-glColorMask_ptr_t glColorMask_ptr = 0;
-glColorMaski_ptr_t glColorMaski_ptr = 0;
-glFrontFace_ptr_t glFrontFace_ptr = 0;
-glPixelStoref_ptr_t glPixelStoref_ptr = 0;
-glPixelStorei_ptr_t glPixelStorei_ptr = 0;
-glPolygonMode_ptr_t glPolygonMode_ptr = 0;
-glTexParameterf_ptr_t glTexParameterf_ptr = 0;
-glTexParameteri_ptr_t glTexParameteri_ptr = 0;
-glUseProgram_ptr_t glUseProgram_ptr = 0;
-
-struct GLStateBank
-{
-    GLboolean blend;
-    GLboolean colorLogic;
-    GLboolean cullFace;
-    GLboolean depthClamp;
-    GLboolean depthTest;
-    GLboolean dither;
-    GLboolean framebufferSRGB;
-    GLboolean lineSmooth;
-    GLboolean multisample;
-    GLboolean polygonOffsetFill;
-    
-    GLboolean polygonOffsetLine;
-    GLboolean polygonOffsetPoint;
-    GLboolean polygonSmooth;
-    GLboolean primitiveRestart;
-    GLboolean sampleAlphaToCoverage;
-    GLboolean sampleAlphaToOne;
-    GLboolean sampleCoverage;
-    GLboolean scissorTest;
-    GLboolean stencilTest;
-    GLboolean textureCubeMapSeamless;
-
-    GLboolean programPointSize;
-    GLboolean colorWritemask;
-
-    GLint currentProgram;
-    GLint frontFace;
-    GLint blendSRC;
-    GLint blendDST;
-
-    GLint pixelUnpackBufferBinding;
-    GLint arrayBufferBinding;
-    GLint activeTexture;
-    GLint vertexArrayShading;
-    GLint vertexArrayBinding;
-    GLint elementArrayBufferBinding;
-    GLint drawFramebufferBinding;
-    GLint readFramebufferBinding;
-    GLint polygonMode;
-
-    GLint unpackSwapBuffers;
-    GLint unpackLsbFirst;
-    GLint unpackRowLength;
-    GLint unpackImageHeight;
-    GLint unpackSkipRows;
-    GLint unpackSkipPixels;
-    GLint unpackSkipImages;
-    GLint unpackAlignment;
-
-    GLint samplerBinding;
-    GLint textureBinding2D;
-
-    GLfloat blendColor[4];
+static const GLfloat squareVertices[] = {
+    -10.0f, -1.0f,
+    1.0f, -1.0f,
+    -1.0f,  1.0f,
+    1.0f,  1.0f,
 };
 
-struct GLStateBank *stateBank = 0;
+static const GLfloat textureVertices[] = {
+    10.0f, 1.0f,
+    1.0f, 0.0f,
+    0.0f,  1.0f,
+    0.0f,  0.0f,
+};
+enum {
+    ATTRIB_VERTEX,
+    ATTRIB_TEXTUREPOSITON,
+    NUM_ATTRIBUTES
+};
+
+#define CHECK_GL_FUNC_PTR(PTR) if( PTR == 0 ) printf("The function " #PTR " could not be read!\n");
 
 /** 
  * @brief Sets the state of the specified GL attribute, if the current value is different than the target.
@@ -133,7 +34,7 @@ struct GLStateBank *stateBank = 0;
  * @param target Target value.
  * @param store Memory to store the original value in.
  */
-inline void setGLAttr(GLenum pname, GLboolean target, GLboolean *store)
+inline static void setGLAttr(GLenum pname, GLboolean target, GLboolean *store)
 {
     *store = glIsEnabled_ptr(pname);
     if(target == GL_TRUE && *store == GL_FALSE)
@@ -141,7 +42,7 @@ inline void setGLAttr(GLenum pname, GLboolean target, GLboolean *store)
     else if(target == GL_FALSE && *store == GL_TRUE)
         glDisable_ptr(pname);
 }
-inline void resetGLAttr(GLenum pname, GLboolean store)
+inline static void resetGLAttr(GLenum pname, GLboolean store)
 {
     GLboolean active = glIsEnabled_ptr(pname);
 
@@ -153,7 +54,7 @@ inline void resetGLAttr(GLenum pname, GLboolean store)
     }
 }
 
-void normalizeGLState()
+static void normalizeGLState()
 {
     if(stateBank == 0) {
         stateBank = malloc(sizeof(struct GLStateBank));
@@ -230,7 +131,7 @@ void normalizeGLState()
 
     // This was a function call in the original code, but it was already made before,
     // so it is excluded here.
-    // glActiveTexture_ptr(GL_TEXTURE0);
+    glActiveTexture_ptr(GL_TEXTURE0);
 
     glBindSampler_ptr(0, 0);
     glBindTexture_ptr(GL_TEXTURE_2D, 0);
@@ -248,7 +149,7 @@ void normalizeGLState()
     glPixelStorei_ptr(GL_UNPACK_ALIGNMENT, 4);
     glBindBuffer_ptr(GL_ARRAY_BUFFER, 0);
 }
-void resetGLState()
+static void resetGLState()
 {
     // Misc
     glActiveTexture_ptr(GL_TEXTURE0);
@@ -319,8 +220,6 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
         glXQueryDrawable(dpy, drawable, GLX_HEIGHT, &handle->window_height);
     }
 
-    piga_injector_draw();
-
     // Receive the right glXSwapBuffers library.
     if(opengl_glx_handle == 0) {
         opengl_glx_handle = dlopen(handle->libGLX_path, RTLD_LAZY);
@@ -330,19 +229,25 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
     if(glXSwapBuffers_ptr == 0) {
         glXSwapBuffers_ptr = dlsym(opengl_glx_handle, "glXSwapBuffers");
         glXGetProcAddress_ptr = dlsym(opengl_glx_handle, "glXGetProcAddress");
+        glXGetCurrentContext_ptr = dlsym(opengl_glx_handle, "glXGetCurrentContext");
         printf("Read glXSwapBuffers and glXGetProcAddress ptr from libGLX.\n");
     }
+
     if(glGetBooleanv_ptr == 0) {
         // Receive all OpenGL functions.
         glGetBooleanv_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetBooleanv");
+        CHECK_GL_FUNC_PTR(glGetBooleanv_ptr)
         glGetIntegerv_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetIntegerv");
+        CHECK_GL_FUNC_PTR(glGetIntegerv_ptr)
         glGetFloatv_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetFloatv");
+        CHECK_GL_FUNC_PTR(glGetFloatv_ptr)
         
         glActiveTexture_ptr = glXGetProcAddress_ptr((const unsigned char*) "glActiveTexture");
         glBindBuffer_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBindBuffer");
         glBindFramebuffer_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBindFramebuffer");
         glBindTexture_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBindTexture");
         glBindVertexArray_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBindVertexArray");
+        glBindSampler_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBindSampler");
         glBlendColor_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBlendColor");
         glBlendFunc_ptr = glXGetProcAddress_ptr((const unsigned char*) "glBlendFunc");
         glColorMask_ptr = glXGetProcAddress_ptr((const unsigned char*) "glColorMask");
@@ -360,14 +265,109 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
         glIsEnabled_ptr = glXGetProcAddress_ptr((const unsigned char*) "glIsEnabled");
         glIsEnabledi_ptr = glXGetProcAddress_ptr((const unsigned char*) "glIsEnabledi");
 
+        glCreateShader_ptr = glXGetProcAddress_ptr((const unsigned char*) "glCreateShader");
+        CHECK_GL_FUNC_PTR(glCreateShader_ptr)
+        glShaderSource_ptr = glXGetProcAddress_ptr((const unsigned char*) "glShaderSource");
+        CHECK_GL_FUNC_PTR(glShaderSource_ptr)
+        glCompileShader_ptr = glXGetProcAddress_ptr((const unsigned char*) "glCompileShader");
+        CHECK_GL_FUNC_PTR(glCompileShader_ptr)
+        glDeleteShader_ptr = glXGetProcAddress_ptr((const unsigned char*) "glDeleteShader");
+        CHECK_GL_FUNC_PTR(glDeleteShader_ptr)
+        glCreateProgram_ptr = glXGetProcAddress_ptr((const unsigned char*) "glCreateProgram");
+        CHECK_GL_FUNC_PTR(glCreateProgram_ptr)
+        glAttachShader_ptr = glXGetProcAddress_ptr((const unsigned char*) "glAttachShader");
+        CHECK_GL_FUNC_PTR(glAttachShader_ptr)
+        glLinkProgram_ptr = glXGetProcAddress_ptr((const unsigned char*) "glLinkProgram");
+        CHECK_GL_FUNC_PTR(glLinkProgram_ptr)
+        glGetProgramiv_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetProgramiv");
+        CHECK_GL_FUNC_PTR(glGetProgramiv_ptr)
+        glGetShaderiv_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetShaderiv");
+        CHECK_GL_FUNC_PTR(glGetShaderiv_ptr)
+        glDeleteProgram_ptr = glXGetProcAddress_ptr((const unsigned char*) "glDeleteProgram");
+        CHECK_GL_FUNC_PTR(glDeleteProgram_ptr)
+        glGetAttribLocation_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetAttribLocation");
+        CHECK_GL_FUNC_PTR(glGetAttribLocation_ptr)
+        glGetUniformLocation_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGetUniformLocation");
+        CHECK_GL_FUNC_PTR(glGetUniformLocation_ptr)
+        glGenTextures_ptr = glXGetProcAddress_ptr((const unsigned char*) "glGenTextures");
+        CHECK_GL_FUNC_PTR(glGenTextures_ptr)
+        glTexImage2D_ptr = glXGetProcAddress_ptr((const unsigned char*) "glTexImage2D");
+        CHECK_GL_FUNC_PTR(glTexImage2D_ptr)
+        glUniform1i_ptr = glXGetProcAddress_ptr((const unsigned char*) "glUniform1i");
+        CHECK_GL_FUNC_PTR(glUniform1i_ptr)
+        glVertexAttribPointer_ptr = glXGetProcAddress_ptr((const unsigned char*) "glVertexAttribPointer");
+        CHECK_GL_FUNC_PTR(glVertexAttribPointer_ptr)
+        glEnableVertexAttribArray_ptr = glXGetProcAddress_ptr((const unsigned char*) "glEnableVertexAttribArray");
+        CHECK_GL_FUNC_PTR(glVertexAttribPointer_ptr)
+
         printf("Received OpenGL functions.\n");
     }
 
-    // Draw the surface ontop of the drawable.
-    // TODO
-    // 1. Normalize context (Example: https://github.com/nickguletskii/GLXOSD/blob/master/src/glxosd/rendering/normalise_gl_state.lua)
-    // 2. Render (Example: https://github.com/nickguletskii/GLXOSD/blob/master/src/glxosd/rendering/TextRenderer.lua)
-    // 3. Test
+    // Handle the context.
+    GLXContext ctx = glXGetCurrentContext_ptr();
+
+    normalizeGLState();
+    
+    if(gl_vertex_shader == 0) {
+        // Check the version.
+        GLint major, minor;
+        glGetIntegerv_ptr(GL_MAJOR_VERSION, &major);
+        glGetIntegerv_ptr(GL_MINOR_VERSION, &minor);
+        printf("GL-Version: %i.%i\n", major, minor);
+        
+        gl_vertex_shader = piga_opengl_make_shader(GL_VERTEX_SHADER,
+                                                   handle->vertex_shader);
+    }
+    if(gl_fragment_shader == 0) {
+        gl_vertex_shader = piga_opengl_make_shader(GL_VERTEX_SHADER,
+                                                   handle->fragment_shader);
+    }
+
+    if(gl_program == 0 && gl_vertex_shader != 0 && gl_fragment_shader != 0) {
+        gl_program = piga_opengl_make_program(gl_vertex_shader, gl_fragment_shader);
+
+        // Assign texture
+        gl_texture = glGetUniformLocation_ptr(gl_program, "tex");
+
+        printf("Read shaders, linked program and received the \"texture\" uniform.\n");
+    }
+
+    piga_injector_draw();
+
+    // A very good example (ES 2.0) is here: http://stackoverflow.com/a/4227878
+    glUseProgram_ptr(gl_program);
+
+    if(gl_texture == 0) {
+        // Assign a texture.
+        glGenTextures_ptr(1, &gl_texture);
+        gl_texture_uniform_texture = glGetUniformLocation_ptr(gl_program, "texture");
+    }
+    if(gl_texture != 0 && handle->draw_request) {
+        // Upload the cairo surface to opengl.
+        if(handle->cairo_surface == 0) {
+            printf("No cairo surface available!\n");
+            goto exit_return;
+        }
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture_ptr(GL_TEXTURE_RECTANGLE_ARB, gl_texture);
+        glTexImage2D_ptr(GL_TEXTURE_2D, 0, GL_RGBA,
+                         handle->window_width, handle->window_height,
+                         0, GL_BGRA, GL_UNSIGNED_BYTE, handle->cairo_data);
+        glUniform1i_ptr(gl_texture_uniform_texture, 0);
+
+
+        glEnableVertexAttribArray_ptr(ATTRIB_VERTEX);
+        glVertexAttribPointer_ptr(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, squareVertices);
+        GLint texAttrib = glGetAttribLocation_ptr(gl_program, "texcoord");
+        glEnableVertexAttribArray_ptr(texAttrib);
+        glVertexAttribPointer_ptr(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, textureVertices);
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+    
+exit_return:
+    resetGLState();
 
     glXSwapBuffers_ptr(dpy, drawable);
 }

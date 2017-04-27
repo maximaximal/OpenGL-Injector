@@ -7,4 +7,4 @@ source_dir=$1;
 prefix_dir=$2;
 
 export CFLAGS="$CFLAGS -fPIC"
-$1/configure --enable-static LDLAGS=-static --prefix=$2
+$1/configure --enable-static LDLAGS=-static CFLAGS=-g --prefix=$2

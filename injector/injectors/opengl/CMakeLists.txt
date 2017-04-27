@@ -1,3 +1,4 @@
 set(OPENGL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders.c
     PARENT_SCOPE)

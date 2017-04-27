@@ -28,10 +28,10 @@ generate_export_header(piga-injector)
 set_property(TARGET piga-injector PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET piga-injector PROPERTY C_STANDARD_REQUIRED 11)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/lua/
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/piga-injector/lua/
-    FILES_MATCHING PATTERN "*.lua"
-    )
+add_custom_command(
+    TARGET piga-injector
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_BINARY_DIR}/piga-injector/lua/)
 
 # External Projects. Make compiling as fast as possible using processor count.
 include(ProcessorCount)

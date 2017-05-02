@@ -1,11 +1,11 @@
 #version 330 core
 
 in vec2 f_texcoord;
-uniform sampler2D tex;
+uniform sampler2DRect tex;
+
+out vec4 outColor;
 
 void main()
 {
-    //gl_FragColor = texture(tex, texcoord);
-    gl_FragColor = texture(tex, f_texcoord);
-    //gl_FragColor = texture(tex, texcoord);
+    outColor = texture(tex, f_texcoord);
 }

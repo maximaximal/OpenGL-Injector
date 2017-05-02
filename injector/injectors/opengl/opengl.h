@@ -13,6 +13,9 @@ typedef GLXContext (*glXGetCurrentContext_ptr_t)();
 typedef void (*glGetIntegerv_ptr_t)(GLenum pname, GLint *v);
 typedef void (*glGetFloatv_ptr_t)(GLenum pname, GLfloat *v);
 typedef void (*glGetBooleanv_ptr_t)(GLenum pname, GLboolean *v);
+typedef void (*glGetShaderInfoLog_ptr_t)(GLuint shader, GLsizei maxLength, GLsizei *length, GLchar *infoLog);
+typedef void (*glGetProgramInfoLog_ptr_t)(GLuint shader, GLsizei maxLength, GLsizei *length, GLchar *infoLog);
+typedef GLenum (*glGetError_ptr_t)();
 
 typedef void (*glEnable_ptr_t)(GLenum pname);
 typedef void (*glDisable_ptr_t)(GLenum pname);
@@ -31,6 +34,8 @@ typedef void (*glBindTexture_ptr_t)(GLenum target, GLuint texture);
 typedef void (*glBindSampler_ptr_t)(GLuint unit, GLuint sampler);
 typedef void (*glBindBuffer_ptr_t)(GLenum target, GLuint buffer);
 typedef void (*glBindVertexArray_ptr_t)(GLuint array);
+typedef void (*glBindAttribLocation_ptr_t)(GLuint program, GLuint index, const GLchar *name);
+
 typedef void (*glPolygonMode_ptr_t)(GLenum face, GLenum mode);
 typedef void (*glTexParameterf_ptr_t)(GLenum target, GLenum pname, GLfloat param);
 typedef void (*glTexParameteri_ptr_t)(GLenum target, GLenum pname, GLint param);
@@ -68,6 +73,9 @@ glXGetCurrentContext_ptr_t glXGetCurrentContext_ptr;
 glGetIntegerv_ptr_t glGetIntegerv_ptr;
 glGetBooleanv_ptr_t glGetBooleanv_ptr;
 glGetFloatv_ptr_t glGetFloatv_ptr;
+glGetShaderInfoLog_ptr_t glGetShaderInfoLog_ptr;
+glGetProgramInfoLog_ptr_t glGetProgramInfoLog_ptr;
+glGetError_ptr_t glGetError_ptr;
 
 glEnable_ptr_t glEnable_ptr;
 glDisable_ptr_t glDisable_ptr;
@@ -80,6 +88,7 @@ glBindFramebuffer_ptr_t glBindFramebuffer_ptr;
 glBindSampler_ptr_t glBindSampler_ptr;
 glBindTexture_ptr_t glBindTexture_ptr;
 glBindVertexArray_ptr_t glBindVertexArray_ptr;
+glBindAttribLocation_ptr_t glBindAttribLocation_ptr;
 glBlendColor_ptr_t glBlendColor_ptr;
 glBlendFunc_ptr_t glBlendFunc_ptr;
 glColorMask_ptr_t glColorMask_ptr;
@@ -116,6 +125,7 @@ glEnableVertexAttribArray_ptr_t glEnableVertexAttribArray_ptr;
 
 bool gl_shader_initialized;
 bool gl_program_initialized;
+bool gl_all_initialized;
 GLuint gl_vertex_shader;
 GLuint gl_fragment_shader;
 GLuint gl_program;
@@ -123,7 +133,7 @@ GLuint gl_texture;
 GLint gl_position;
 GLint gl_texture_uniform_texture;
 GLint gl_texture_uniform_texcoord;
-GLuint gl_vbo;
+GLuint gl_vbo[2];
 GLuint gl_vao;
 
 struct GLStateBank
@@ -188,3 +198,5 @@ struct GLStateBank *stateBank;
 void PIGA_INJECTOR_EXPORT glXSwapBuffers(Display *dpy, GLXDrawable drawable);
 
 EGLBoolean PIGA_INJECTOR_EXPORT eglSwapBuffers(EGLDisplay display, EGLSurface surface);
+
+PIGA_INJECTOR_EXPORT bool piga_opengl_check_for_errors();

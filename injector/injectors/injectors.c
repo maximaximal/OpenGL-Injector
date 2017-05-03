@@ -216,7 +216,9 @@ void piga_injector_refresh_lua()
         printf("Successfully loaded overlay.lua.\n");
     }
     free(main_file);
-    
+
+    // Run the GC
+    lua_gc(injector_handle->L, LUA_GCCOLLECT, 0);
 }
 
 void piga_injector_draw()
@@ -260,8 +262,6 @@ void piga_injector_draw()
         piga_lua_set_global_int(injector_handle->L, injector_handle->window_width, "WIDTH");
         piga_lua_set_global_int(injector_handle->L, injector_handle->window_height, "HEIGHT");
 
-        // Set the initial cairo scale.
-        cairo_scale(injector_handle->cairo_cr, injector_handle->window_width, injector_handle->window_height);
     }
 
     // Begin drawing.
@@ -269,11 +269,12 @@ void piga_injector_draw()
     // Call Lua to draw the overlay according to the current state of the console.
     if(piga_lua_call_bool_func(injector_handle->L, "needsRedraw")) {
         // Make the background transparent
+        cairo_save(injector_handle->cairo_cr);
         cairo_set_operator(injector_handle->cairo_cr, CAIRO_OPERATOR_SOURCE);
-        cairo_set_source_rgba(injector_handle->cairo_cr, 0.0, 0.0, 0.0, 0.5);
+        cairo_set_source_rgba(injector_handle->cairo_cr, 0.0, 0.0, 0.0, 0);
         cairo_paint(injector_handle->cairo_cr);
+        cairo_restore(injector_handle->cairo_cr);
 
-        cairo_set_operator(injector_handle->cairo_cr, CAIRO_OPERATOR_OVER);
         piga_lua_call_void_func(injector_handle->L, "draw"); 
 
         cairo_surface_flush(injector_handle->cairo_surface);

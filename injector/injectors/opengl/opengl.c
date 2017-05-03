@@ -330,6 +330,8 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
         CHECK_GL_FUNC_PTR(glBufferSubData_ptr)
         glTexImage2D_ptr = glXGetProcAddress_ptr((const unsigned char*) "glTexImage2D");
         CHECK_GL_FUNC_PTR(glTexImage2D_ptr)
+        glTexSubImage2D_ptr = glXGetProcAddress_ptr((const unsigned char*) "glTexSubImage2D");
+        CHECK_GL_FUNC_PTR(glTexSubImage2D_ptr)
         glUniform1i_ptr = glXGetProcAddress_ptr((const unsigned char*) "glUniform1i");
         CHECK_GL_FUNC_PTR(glUniform1i_ptr)
         glVertexAttribPointer_ptr = glXGetProcAddress_ptr((const unsigned char*) "glVertexAttribPointer");
@@ -379,16 +381,22 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
         // Assign a texture.
         glGenTextures_ptr(1, &gl_texture);
         piga_opengl_check_for_errors("Gen-Texture");
-        glBindTexture_ptr(GL_TEXTURE_RECTANGLE, gl_texture);
+        glBindTexture_ptr(GL_TEXTURE_2D, gl_texture);
         piga_opengl_check_for_errors("Bind-Texture");
 
-        glTexParameteri_ptr(GL_TEXTURE_RECTANGLE, GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri_ptr(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAX_LEVEL, 0);
-        glTexParameteri_ptr(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri_ptr(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+        glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         piga_opengl_check_for_errors("Texture Properties");
+
+        piga_opengl_check_for_errors("Set Texture Stride");
+        glTexImage2D_ptr(GL_TEXTURE_2D, 0, GL_RGBA,
+                         handle->window_width, handle->window_height,
+                         0, GL_BGRA, GL_UNSIGNED_BYTE, handle->cairo_data);
+        piga_opengl_check_for_errors("Create Texture with Data");
         
-        glBindTexture_ptr(GL_TEXTURE_RECTANGLE, 0);
+        glBindTexture_ptr(GL_TEXTURE_2D, 0);
         piga_opengl_check_for_errors("Un-Bind Texture");
 
         // Generate the VAO.
@@ -449,40 +457,33 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
     piga_injector_draw();
     piga_opengl_check_for_errors("Piga Injector Draw");
 
+    glUseProgram_ptr(gl_program);
+    piga_opengl_check_for_errors("Use Program (Draw)");
+    glBindVertexArray_ptr(gl_vao);
+    piga_opengl_check_for_errors("Bind VAO (Draw)");
+
+    // Update the texture.
+    glBindTexture_ptr(GL_TEXTURE_2D, gl_texture);
+    piga_opengl_check_for_errors("Bind Texture (Draw)");
+    glActiveTexture_ptr(GL_TEXTURE0);
+    piga_opengl_check_for_errors("Active Texture (Draw)");
     if(handle->draw_request) {
-        // Upload the cairo surface to opengl.
-        if(handle->cairo_surface == 0) {
-            printf("No cairo surface available!\n");
-            goto exit_return;
-        }
-        
-        glUseProgram_ptr(gl_program);
-        piga_opengl_check_for_errors("Use Program (Draw)");
-        glBindVertexArray_ptr(gl_vao);
-        piga_opengl_check_for_errors("Bind VAO (Draw)");
-
-        // Update the texture.
-        glBindTexture_ptr(GL_TEXTURE_RECTANGLE, gl_texture);
-        piga_opengl_check_for_errors("Bind Texture (Draw)");
-        glActiveTexture_ptr(GL_TEXTURE0);
-        piga_opengl_check_for_errors("Active Texture (Draw)");
-
-        glTexImage2D_ptr(GL_TEXTURE_RECTANGLE, 0, GL_RGBA,
-                         handle->window_width, handle->window_height,
-                         0, GL_BGRA, GL_UNSIGNED_BYTE, handle->cairo_data);
-        piga_opengl_check_for_errors("Fill Texture (Draw)");
-
-        // A very good example (ES 2.0) is here: http://stackoverflow.com/a/4227878
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        piga_opengl_check_for_errors("Draw Arrays");
-
-        glUseProgram_ptr(0);
-        glBindVertexArray_ptr(0);
-        glBindBuffer_ptr(GL_ARRAY_BUFFER, 0);
-        glBindTexture_ptr(GL_TEXTURE_2D, 0);
+        piga_opengl_check_for_errors("Set Texture Stride (Draw)");
+        glTexSubImage2D_ptr(GL_TEXTURE_2D, 0, 0, 0,
+                            handle->window_width, handle->window_height,
+                            GL_BGRA, GL_UNSIGNED_BYTE, handle->cairo_data);
     }
+
+    // A very good example (ES 2.0) is here: http://stackoverflow.com/a/4227878
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    piga_opengl_check_for_errors("Draw Arrays");
+
+    glUseProgram_ptr(0);
+    glBindVertexArray_ptr(0);
+    glBindBuffer_ptr(GL_ARRAY_BUFFER, 0);
+    glPixelStorei_ptr(GL_UNPACK_ROW_LENGTH, 0);
+    glBindTexture_ptr(GL_TEXTURE_RECTANGLE, 0);
     
-exit_return:
     glUseProgram_ptr(0);
     piga_opengl_check_for_errors("Cleanup: Use Program 0");
     resetGLState();

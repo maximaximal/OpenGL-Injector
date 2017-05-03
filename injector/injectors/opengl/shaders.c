@@ -23,8 +23,6 @@ GLuint piga_opengl_make_shader(GLenum type, const char *path)
     glCompileShader_ptr(shader);
     glGetShaderiv_ptr(shader, GL_COMPILE_STATUS, &ok);
 
-    printf("ADD SHADER: \n%s!\n", source);
-
     free(source);
 
     // Debug output.

@@ -214,6 +214,10 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
 {
     struct piga_injector_handle_t* handle = piga_injector_init();
 
+    if(handle->use_reloading) {
+        piga_injector_check_inotify();
+    }
+
     if(handle->window_width == 0) {
         glXQueryDrawable(dpy, drawable, GLX_WIDTH, &handle->window_width);
     }

@@ -8,6 +8,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
 add_subdirectory(injectors)
 
+file(GLOB_RECURSE LUA_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/lua/*.lua)
+
 include(GenerateExportHeader)
 
 add_library(piga-injector SHARED ${INJECTORS_SRCS})
@@ -30,6 +32,7 @@ set_property(TARGET piga-injector PROPERTY C_STANDARD_REQUIRED 11)
 
 add_custom_command(
     TARGET piga-injector
+    DEPENDS ${LUA_SCRIPTS}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_BINARY_DIR}/piga-injector/lua/)
 

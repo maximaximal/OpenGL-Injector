@@ -2,6 +2,7 @@
 
 libGL_path = "/usr/lib/libGL.so"
 libGLX_path = "/usr/lib/libGLX.so"
+libFontConfig_path = "/usr/lib/libfontconfig.so"
 
 -- Shaders
 vertexShaderPath = PATH .. "/lua/shaders/overlay.vert"

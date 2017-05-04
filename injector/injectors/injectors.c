@@ -10,6 +10,7 @@
 #include <sys/inotify.h>
 
 #include "lua_utils.h"
+#include "fontconfig_wrapper.h"
 
 #include <cairo/cairo.h>
 
@@ -97,6 +98,9 @@ struct piga_injector_handle_t*  piga_injector_init()
 
     injector_handle->vertex_shader = get_global_str(injector_handle->L, "vertexShaderPath");
     injector_handle->fragment_shader = get_global_str(injector_handle->L, "fragmentShaderPath");
+
+    const char *fontconfig_path = get_global_str(injector_handle->L, "libFontConfig_path");
+    piga_load_fontconfig(fontconfig_path);
 
     // Check the variables.
     if(injector_handle->libGL_path == 0) {

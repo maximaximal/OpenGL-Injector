@@ -14,6 +14,8 @@ include(GenerateExportHeader)
 
 add_library(piga-injector SHARED ${INJECTORS_SRCS})
 
+target_include_directories(piga-injector PRIVATE ${FONTCONFIG_INCLUDE_DIR})
+
 set_target_properties(piga-injector PROPERTIES LINK_SEARCH_START_STATIC 1)
 set_target_properties(piga-injector PROPERTIES LINK_SEARCH_END_STATIC 1)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
@@ -23,8 +25,6 @@ find_package(Lua REQUIRED)
 
 set(CMAKE_EXE_LINKER_FLAGS " -static")
 target_link_libraries(piga-injector -static-libgcc -static-libstdc++ m)
-
-target_include_directories(piga-injector PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/injectors)
 
 generate_export_header(piga-injector)
 set_property(TARGET piga-injector PROPERTY POSITION_INDEPENDENT_CODE ON)

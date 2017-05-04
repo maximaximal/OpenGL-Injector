@@ -17,13 +17,13 @@ static const GLfloat squareVertices[] = {
 };
 
 static const GLfloat textureVertices[] = {
-    0.0f, 0.0f,
     0.0f, 1.0f,
-    1.0f, 1.0f,
-
     0.0f, 0.0f,
-    1.0f, 1.0f,
     1.0f, 0.0f,
+
+    0.0f, 1.0f,
+    1.0f, 0.0f,
+    1.0f, 1.0f,
 };
 
 #define CHECK_GL_FUNC_PTR(PTR) if( PTR == 0 ) printf("The function " #PTR " could not be read!\n");
@@ -103,6 +103,7 @@ static void normalizeGLState()
     glGetIntegerv_ptr(GL_VERTEX_ARRAY_BINDING, &stateBank->vertexArrayBinding);
     glGetIntegerv_ptr(GL_ELEMENT_ARRAY_BUFFER_BINDING, &stateBank->elementArrayBufferBinding);
     glGetIntegerv_ptr(GL_READ_FRAMEBUFFER_BINDING, &stateBank->readFramebufferBinding);
+    glGetIntegerv_ptr(GL_DRAW_FRAMEBUFFER_BINDING, &stateBank->drawFramebufferBinding);
     glGetIntegerv_ptr(GL_POLYGON_MODE, &stateBank->polygonMode);
 
     // Unpack States
@@ -126,7 +127,6 @@ static void normalizeGLState()
     glFrontFace_ptr(GL_CCW);
     glColorMask_ptr(1, 1, 1, 1);
     glBlendFunc_ptr(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBindFramebuffer_ptr(GL_DRAW_FRAMEBUFFER, 0);
     glBindFramebuffer_ptr(GL_READ_FRAMEBUFFER, 0);
     glPolygonMode_ptr(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -169,6 +169,7 @@ static void resetGLState()
 
     // Buffer State
     glActiveTexture_ptr(stateBank->activeTexture);
+    piga_opengl_check_for_errors("1");
 	glBindVertexArray_ptr(stateBank->vertexArrayBinding);
 	glBindBuffer_ptr(GL_PIXEL_UNPACK_BUFFER, stateBank->pixelUnpackBufferBinding);
 	glBindBuffer_ptr(GL_ARRAY_BUFFER, stateBank->arrayBufferBinding);
@@ -478,11 +479,9 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable)
     glDrawArrays(GL_TRIANGLES, 0, 6);
     piga_opengl_check_for_errors("Draw Arrays");
 
-    glUseProgram_ptr(0);
     glBindVertexArray_ptr(0);
-    glBindBuffer_ptr(GL_ARRAY_BUFFER, 0);
-    glPixelStorei_ptr(GL_UNPACK_ROW_LENGTH, 0);
-    glBindTexture_ptr(GL_TEXTURE_RECTANGLE, 0);
+    glActiveTexture_ptr(GL_TEXTURE0);
+    glBindTexture_ptr(GL_TEXTURE_2D, 0);
     
     glUseProgram_ptr(0);
     piga_opengl_check_for_errors("Cleanup: Use Program 0");

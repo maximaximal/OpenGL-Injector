@@ -1,9 +1,9 @@
 #pragma once
 
-#include <stdbool.h>
 #include <lua.h>
+#include <stdbool.h>
 
-const char* get_global_str(lua_State *L, const char *varname);
+const char *get_global_str(lua_State *L, const char *varname);
 
 void piga_lua_call_void_func(lua_State *L, const char *func);
 bool piga_lua_call_bool_func(lua_State *L, const char *func);

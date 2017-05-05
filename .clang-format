@@ -1,0 +1,14 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+---
+Language: Cpp
+DerivePointerAlignment: false
+PointerAlignment: Right
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AlignConsecutiveDeclarations: true
+Cpp11BracedListStyle: true
+UseTab: Never
+ColumnLimit: 80

@@ -11,10 +11,13 @@
 
 #include "fontconfig_wrapper.h"
 #include "lua_utils.h"
+#include "x11/x_events.h"
+
+#include <injectors/config.h>
 
 #include <cairo/cairo.h>
 
-struct piga_injector_handle_t *injector_handle = 0;
+struct piga_injector_handle_t *injector_handle = NULL;
 
 #define CHECK_AND_RETURN(PATH)                                                 \
     if (access(PATH "/lua/config.lua", R_OK) != -1)                            \
@@ -36,6 +39,17 @@ const char *piga_injector_get_script_path() {
     return 0;
 }
 
+const char *piga_injector_get_program_config() {
+    char *env_path = getenv("PIGA_INJECTOR_PROGRAM_CONFIG");
+    if (env_path != 0) {
+        return env_path;
+    }
+    printf("No \"PIGA_INJECTOR_PROGRAM_CONFIG\" environment variable found. "
+           "Using default program config without specific configuration "
+           "options.\n");
+    return "";
+}
+
 struct piga_injector_handle_t *piga_injector_init() {
     if (injector_handle != 0) {
         return injector_handle;
@@ -45,6 +59,7 @@ struct piga_injector_handle_t *piga_injector_init() {
     injector_handle = malloc(sizeof(struct piga_injector_handle_t));
     injector_handle->libGL_path = 0;
     injector_handle->libGLX_path = 0;
+    injector_handle->libXlib_path = 0;
     injector_handle->vertex_shader = 0;
     injector_handle->fragment_shader = 0;
     injector_handle->window_width = 0;
@@ -53,12 +68,15 @@ struct piga_injector_handle_t *piga_injector_init() {
     injector_handle->L = 0;
     injector_handle->cairo_cr = 0;
     injector_handle->cairo_surface = 0;
+    injector_handle->cairo_data = 0;
     injector_handle->draw_request = false;
     injector_handle->use_reloading = false;
     injector_handle->inotify_ev_buf_size =
         (sizeof(struct inotify_event) + NAME_MAX + 1) * 2;
     injector_handle->inotify_ev_buf =
         calloc(injector_handle->inotify_ev_buf_size, sizeof(char));
+
+    global_piga_injector_handle = injector_handle;
 
     injector_handle->L = luaL_newstate();
     if (!injector_handle->L) {
@@ -83,6 +101,13 @@ struct piga_injector_handle_t *piga_injector_init() {
     // Setup lua global variables.
     lua_pushstring(injector_handle->L, path);
     lua_setglobal(injector_handle->L, "PATH");
+    lua_pushstring(injector_handle->L, SYSTEM_ABSOLUTE_LIBDIR_PATH);
+    lua_setglobal(injector_handle->L, "SYSTEM_LIBDIR_PATH");
+
+    // Look for program specific options.
+    const char * program_specific_options = piga_injector_get_program_config();
+    lua_pushstring(injector_handle->L, program_specific_options);
+    lua_setglobal(injector_handle->L, "OPTIONS_SCRIPT");
 
     // Read lua config file.
     char *config_file = piga_injector_combine_path(path, "/lua/config.lua");
@@ -98,6 +123,8 @@ struct piga_injector_handle_t *piga_injector_init() {
         get_global_str(injector_handle->L, "libGL_path");
     injector_handle->libGLX_path =
         get_global_str(injector_handle->L, "libGLX_path");
+    injector_handle->libXlib_path =
+        get_global_str(injector_handle->L, "libXlib_path");
 
     injector_handle->vertex_shader =
         get_global_str(injector_handle->L, "vertexShaderPath");
@@ -115,6 +142,9 @@ struct piga_injector_handle_t *piga_injector_init() {
     if (injector_handle->libGLX_path == 0) {
         printf("No libGLX_path set in %s!\n", config_file);
     }
+    if (injector_handle->libXlib_path == 0) {
+        printf("No libXlib_path set in %s!\n", config_file);
+    }
     if (injector_handle->vertex_shader == 0) {
         printf("No vertexShaderPath set in %s!\n", config_file);
     }
@@ -123,6 +153,10 @@ struct piga_injector_handle_t *piga_injector_init() {
     }
 
     free(config_file);
+
+    // Load X-Events.
+    printf("Loading X11 from %s\n", injector_handle->libXlib_path);
+    piga_load_x_events(injector_handle->libXlib_path);
 
     // Add the main lua file.
     piga_injector_refresh_lua(path);

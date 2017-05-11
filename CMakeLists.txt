@@ -24,8 +24,14 @@ add_definitions(-DQT_NO_KEYWORDS)
 # Find Boost libraries.
 find_package(Boost COMPONENTS log)
 
+# Find libpiga.
+find_package(Piga REQUIRED)
+
 # Find libx11 and xlib.
 find_package(X11)
+
+# GNU default dirs.
+include(GNUInstallDirs)
 
 # The hub subdirectory contains everything needed for the piga-hub. It contains required
 # C++ classes to be built and makes them available as a static library. This library is then

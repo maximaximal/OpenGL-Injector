@@ -30,6 +30,10 @@ generate_export_header(piga-injector)
 set_property(TARGET piga-injector PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET piga-injector PROPERTY C_STANDARD_REQUIRED 11)
 
+target_include_directories(piga-injector PRIVATE ${X11_INCLUDE_DIR})
+
+target_include_directories(piga-injector PRIVATE ${PIGA_INCLUDE_DIRS})
+
 add_custom_command(
     TARGET piga-injector
     DEPENDS ${LUA_SCRIPTS}

@@ -20,6 +20,7 @@ PIGA_INJECTOR_NO_EXPORT enum piga_injector_status_t {
 PIGA_INJECTOR_NO_EXPORT struct piga_injector_handle_t {
     const char *libGL_path;
     const char *libGLX_path;
+    const char *libXlib_path;
 
     const char *vertex_shader;
     const char *fragment_shader;
@@ -47,6 +48,8 @@ PIGA_INJECTOR_NO_EXPORT struct piga_injector_handle_t {
     char *                inotify_ev_buf;
     size_t                inotify_ev_buf_size;
 };
+
+struct piga_injector_handle_t *global_piga_injector_handle;
 
 PIGA_INJECTOR_NO_EXPORT char *piga_injector_combine_path(const char *p1,
                                                          const char *p2);

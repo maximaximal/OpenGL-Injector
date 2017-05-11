@@ -442,7 +442,9 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
         glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         piga_opengl_check_for_errors("Texture Properties");
 
-        piga_opengl_check_for_errors("Set Texture Stride");
+        printf("Window Width: %i\n", handle->window_width);
+        printf("Window Height: %i\n", handle->window_height);
+        
         glTexImage2D_ptr(GL_TEXTURE_2D, 0, GL_RGBA, handle->window_width,
                          handle->window_height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
                          handle->cairo_data);
@@ -507,7 +509,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
 
         gl_all_initialized = true;
     }
-
+ 
     piga_injector_draw();
     piga_opengl_check_for_errors("Piga Injector Draw");
 

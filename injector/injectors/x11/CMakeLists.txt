@@ -1,0 +1,4 @@
+set(X11_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/x_events.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/x_handling.c
+    PARENT_SCOPE)

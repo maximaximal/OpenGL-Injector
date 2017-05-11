@@ -2,6 +2,7 @@
 
 libGL_path = "/usr/lib/libGL.so"
 libGLX_path = "/usr/lib/libGLX.so"
+libXlib_path = "/usr/lib/libX11.so"
 libFontConfig_path = "/usr/lib/libfontconfig.so"
 
 -- Shaders

@@ -19,6 +19,16 @@ void piga_lua_call_void_func(lua_State *L, const char *func) {
         printf("error running function `%s': %s\n", func, lua_tostring(L, -1));
     }
 }
+void piga_lua_call_void_func_light_userdata(lua_State *L, const char *func, void *userdata)
+{
+    lua_getglobal(L, func);
+
+    lua_pushlightuserdata(L, userdata);
+    
+    if (lua_pcall(L, 1, 0, 0) != 0) {
+        printf("error running function `%s': %s\n", func, lua_tostring(L, -1));
+    }
+}
 bool piga_lua_call_bool_func_light_userdata(lua_State *L, const char *func, void *userdata)
 {
     lua_getglobal(L, func);

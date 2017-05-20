@@ -28,4 +28,5 @@ typedef struct piga_motion_event_t {
     int y;
 } piga_motion_event_t;
 
-PIGA_INJECTOR_NO_EXPORT bool piga_x11_handle_event(XEvent *e);
+PIGA_INJECTOR_NO_EXPORT Bool piga_x11_handle_event(XEvent *e);
+PIGA_INJECTOR_NO_EXPORT int piga_x11_check_event(Display *display, XEvent *e, XPointer pointer);

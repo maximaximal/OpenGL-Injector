@@ -33,11 +33,9 @@ function onKeyPress(e)
     e = toKeyEv(e)
 
     if e.key == options.settingsKey then
-	return false
     end
     if e.key == options.keyboardKey then
 	keyboardOpen = not keyboardOpen
-	return false
     end
     if e.key == options.up then
 	y = y - 10
@@ -51,23 +49,37 @@ function onKeyPress(e)
     if e.key == options.right then
 	x = x + 10
     end
-    return false
 end
 function onKeyRelease(e)
     e = toKeyEv(e)
 
     if e.key == options.settingsKey then
+    end
+end
+function onMotionNotify(e)
+end
+function onButtonPress(e)
+end
+function onWindowEvent(e)
+end
+
+function shouldConsumeKeyEvent(e)
+    e = toKeyEv(e)
+    if e.key == options.settingsKey then
+	return true
+    end
+    if e.key == options.keyboardKey then
 	return true
     end
     return false
 end
-function onMotionNotify(e)
+function shouldConsumeMotionEvent(e)
     return false
 end
-function onButtonPress(e)
+function shouldConsumeButtonEvent(e)
     return false
 end
-function onWindowEvent(e)
+function shouldConsumeWindowEvent(e)
     return false
 end
 

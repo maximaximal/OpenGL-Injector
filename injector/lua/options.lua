@@ -4,7 +4,7 @@ local x = require "ffi.x11"
 options = {
     name = "Default Options",
     settingsKey = x.XK_Tab,
-    keyboardKey = x.XK_F1,
+    keyboardKey = x.XK_a,
 
     up = x.XK_Up,
     down = x.XK_Down,

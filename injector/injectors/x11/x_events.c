@@ -143,6 +143,8 @@ PIGA_OVERRIDE_SYMBOL_DEFINITION(
 
 PIGA_OVERRIDE_SYMBOL_DEFINITION(XPending, int, (Display * dpy)) {
     piga_injector_init();
+    XEvent e;
+    while(XCheckIfEvent(dpy, &e, piga_x11_check_event, NULL));
     return XPending_ptr(dpy);
 }
 

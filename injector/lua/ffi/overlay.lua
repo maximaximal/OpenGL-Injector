@@ -54,10 +54,20 @@ typedef struct piga_xkb_keys_t {
     piga_xkb_skey_t RCTL;
 } piga_xkb_keys_t;
 
-piga_xkb_layouts_t piga_xkb_get_available_layouts();
-void piga_xkb_free_layouts(piga_xkb_layouts_t *layouts);
+typedef struct piga_xkb_keyboard_t {
+    char *name;
+    char *filename;
 
-piga_xkb_keys_t* piga_xkb_get_keys_for_layout(const char *layout);
+    struct piga_xkb_keyboard_t *next;
+} piga_xkb_keyboard_t;
+
+typedef struct piga_xkb_keyboards_t {
+    piga_xkb_keyboard_t *keyboards;
+} piga_xkb_keyboards_t;
+
+piga_xkb_keyboards_t *piga_xkb_get_keyboards();
+
+piga_xkb_keys_t *piga_xkb_get_keys_for_keyboard(piga_xkb_keyboard_t *board);
 
 /* EVENTS */
 typedef struct piga_key_event_t {

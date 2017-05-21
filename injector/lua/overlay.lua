@@ -3,8 +3,11 @@ package.path = package.path .. ";" .. PATH .. "/lua/?.lua"
 
 local cr = require "ffi.cairo"
 local overlay = require "ffi.overlay"
-local Keyboard = require "keyboard"
+local kbd = require "ffi.kbd"
 local ffi = require "ffi"
+
+local Keyboard = require "keyboard"
+local Settings = require "settings"
 
 -- Specify the default options first, but try to load program specific options.
 local optionsScript = PATH .. "/lua/options.lua"
@@ -17,10 +20,10 @@ local options = dofile(optionsScript)
 print("Using options \"" .. options.name .. "\"")
 
 -- Global overlay objects
-local keyboard = Keyboard.init();
+local keyboard = Keyboard:new()
+local settings = Settings:new()
 
 -- Global overlay state
-local keyboardOpen = false
 local requestRedraw = true
 
 -- Conversion functions.
@@ -29,31 +32,39 @@ local toKeyEv = ffi.typeof("piga_key_event_t *")
 local x = 0
 local y = 0
 
+local drawSettings = false
+local drawKeyboard = false
+
 function onKeyPress(e)
     e = toKeyEv(e)
 
     if e.key == options.settingsKey then
+	-- Activate/Deactivate Settings screen.
+	drawSettings = not drawSettings
+	requestRedraw = true
     end
     if e.key == options.keyboardKey then
-	keyboardOpen = not keyboardOpen
+	drawKeyboard = not drawKeyboard
+	requestRedraw = true
     end
-    if e.key == options.up then
-	y = y - 10
+
+    -- Handle global objects.
+    if drawSettings then
+	settings:onKeyPress(e)
     end
-    if e.key == options.down then
-	y = y + 10
-    end
-    if e.key == options.left then
-	x = x - 10
-    end
-    if e.key == options.right then
-	x = x + 10
+    if drawKeyboard then
+	keyboard:onKeyPress(e)
     end
 end
 function onKeyRelease(e)
     e = toKeyEv(e)
 
-    if e.key == options.settingsKey then
+    -- Handle global objects.
+    if drawSettings then
+	settings:onKeyRelease(e)
+    end
+    if drawKeyboard then
+	keyboard:onKeyRelease(e)
     end
 end
 function onMotionNotify(e)
@@ -65,12 +76,26 @@ end
 
 function shouldConsumeKeyEvent(e)
     e = toKeyEv(e)
+
+    -- Global key events.
     if e.key == options.settingsKey then
 	return true
     end
     if e.key == options.keyboardKey then
 	return true
     end
+
+    if drawSettings then
+	if settings.shouldConsumeKeyEvent(e) then
+	    return true
+	end
+    end
+    if drawKeyboard then
+	if keyboard.shouldConsumeKeyEvent(e) then
+	    return true
+	end
+    end
+    
     return false
 end
 function shouldConsumeMotionEvent(e)
@@ -84,43 +109,54 @@ function shouldConsumeWindowEvent(e)
 end
 
 function needsRedraw()
-    return requestRedraw
+    if settings:needsRedraw() or keyboard:needsRedraw() then
+	return true
+    end
+    if requestRedraw then
+	requestRedraw = false
+	return true
+    end
+    return false
 end
 
 function draw()
     -- Test the overlay functions.
-    layouts = overlay.piga_xkb_get_available_layouts()
 
-    for i = 1,tonumber(layouts.size) - 1,1 do
-	--print("Layout " .. ffi.string(layouts.layouts[i]))
+    --for keyboard in kbd.keyboardIterator(keyboards) do
+	-- Iterate over all keyboards.
+	-- print("Keyboard: " .. ffi.string(keyboard.name) .. " in \"" .. ffi.string(keyboard.filename))
+    --end
+
+    if drawSettings then
+	settings.draw()
     end
     
-    overlay.piga_xkb_free_layouts(layouts)
-
-    if keyboardOpen then
-	cr.cairo_set_line_width(ctx, 20)
-	cr.cairo_set_source_rgba(ctx, 1, 0, 0, 0.5)
-	cr.cairo_move_to(ctx, 0, 0)
-	cr.cairo_line_to(ctx, WIDTH, HEIGHT)
-	cr.cairo_stroke(ctx)
-
-	cr.cairo_set_line_width(ctx, 5)
-	cr.cairo_set_source_rgba(ctx, 1, 1, 0, 0.5)
-	cr.cairo_move_to(ctx, WIDTH / 2, 0)
-	cr.cairo_line_to(ctx, 0, HEIGHT / 2)
-	cr.cairo_stroke(ctx)
-
-	cr.cairo_set_source_rgba(ctx, 1, 1, 1, 0.5)
-	cr.cairo_select_font_face(ctx, "Inconsolata",
-	cr.CAIRO_FONT_SLANT_NORMAL,
-	cr.CAIRO_FONT_WEIGHT_BOLD);
-
-	cr.cairo_set_font_size(ctx, HEIGHT / 2);
-
-	cr.cairo_move_to(ctx, x, y);
-	cr.cairo_show_text(ctx, "Test");  
-
+    if drawKeyboard then
+	keyboard.draw()
     end
+    
+    --[[
+    cr.cairo_set_line_width(ctx, 20)
+    cr.cairo_set_source_rgba(ctx, 1, 0, 0, 0.5)
+    cr.cairo_move_to(ctx, 0, 0)
+    cr.cairo_line_to(ctx, WIDTH, HEIGHT)
+    cr.cairo_stroke(ctx)
+
+    cr.cairo_set_line_width(ctx, 5)
+    cr.cairo_set_source_rgba(ctx, 1, 1, 0, 0.5)
+    cr.cairo_move_to(ctx, WIDTH / 2, 0)
+    cr.cairo_line_to(ctx, 0, HEIGHT / 2)
+    cr.cairo_stroke(ctx)
+
+    cr.cairo_set_source_rgba(ctx, 1, 1, 1, 0.5)
+    cr.cairo_select_font_face(ctx, "Inconsolata",
+    cr.CAIRO_FONT_SLANT_NORMAL,
+    cr.CAIRO_FONT_WEIGHT_BOLD);
+
+    cr.cairo_set_font_size(ctx, HEIGHT / 2);
+
+    cr.cairo_move_to(ctx, x, y);
+    cr.cairo_show_text(ctx, "Test");  
 
     cr.cairo_rectangle (ctx, 4, 0, 0.5, 0.5);
     cr.cairo_set_source_rgb (ctx, 5, 0, 1);
@@ -142,6 +178,7 @@ function draw()
     cr.cairo_move_to(ctx, 0, 0)
     cr.cairo_line_to(ctx, WIDTH, 0)
     cr.cairo_stroke(ctx)
+    ]]--
 
   --  cr.cairo_rectangle (ctx, 4, 0, 0.5, 0.5);
   --  cr.cairo_set_source_rgb (ctx, 5, 0, 1);
@@ -149,32 +186,6 @@ function draw()
    -- cr.cairo_move_to(ctx, 0, 0)
     --cr.cairo_line_to(ctx, 0, HEIGHT)
     --cr.cairo_stroke(ctx)
-
-   --circle...
-     cr.cairo_set_line_width(ctx, 9)  
-     cr.cairo_set_source_rgb(ctx, 0.69, 0.19, 0)
-     cr.cairo_set_line_width(ctx, 9)  
-     cr.cairo_set_source_rgb(ctx, 0.69, 0.19, 0)
-     cr.cairo_move_to(ctx, WIDTH / 2, WIDTH / 2)
-     cr.cairo_arc(ctx, 0, 0, 50, 0, 2 * 3.14)
-     cr.cairo_move_to(ctx, WIDTH, 0)
-     cr.cairo_line_to(ctx, 0, HEIGHT)
-     cr.cairo_stroke_preserve(ctx);
-
-    -- ...another circle...
-    linpat = cr.cairo_pattern_create_linear (0, 0, 1, 1)
-    cr.cairo_pattern_add_color_stop_rgb (linpat, 0, 0, 0.3, 0.8)
-    cr.cairo_pattern_add_color_stop_rgb (linpat, 1, 0, 0.8, 0.3)
-
-    radpat = cr.cairo_pattern_create_radial (0.5, 0.5, 0.25, 0.5, 0.5, 0.75)
-    cr.cairo_pattern_add_color_stop_rgba (radpat, 0, 0, 0, 0, 1)
-    cr.cairo_pattern_add_color_stop_rgba (radpat, 0.5, 0, 0, 0, 0)
-
-    cr.cairo_set_source (ctx, linpat);
-    cr.cairo_mask (ctx, radpat);
-
-    
-
     -- cr.cairo_set_source_rgb(ctx, 0.1, 0.1, 0.1);  
 
 

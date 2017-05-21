@@ -1,0 +1,26 @@
+set(XKBCOMP_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/action.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/ast-build.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/compat.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/expr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/include.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/keycodes.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/keymap-dump.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/keymap.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/keymap-priv.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/keywords.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/parser.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rules.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/scanner.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/symbols.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/types.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/vmod.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/context.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/context-priv.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/atom.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/text.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/utf8.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/keysym-utf.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/xkbcomp.c
+    PARENT_SCOPE)

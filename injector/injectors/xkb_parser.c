@@ -1,10 +1,13 @@
 #include "xkb_parser.h"
 
 #include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "xkbcomp/xkbcommon.h"
 
 #define CHECK_AND_RETURN(PATH)                                                 \
     if (access(PATH "/us", R_OK) != -1)                                        \
@@ -12,7 +15,10 @@
 
 const char *get_xkb_symbols_path() {
     CHECK_AND_RETURN("/usr/share/X11/xkb/symbols/");
+    return "";
 }
+
+piga_xkb_keyboards_t *piga_keyboards = NULL;
 
 size_t get_number_of_type_in_dir(const char *path, unsigned char type) {
     size_t         counter = 0;
@@ -33,24 +39,25 @@ size_t get_number_of_type_in_dir(const char *path, unsigned char type) {
     return counter;
 }
 
-piga_xkb_layouts_t piga_xkb_get_available_layouts() {
-    piga_xkb_layouts_t layouts;
-    layouts.layouts = NULL;
-    layouts.size = 0;
+piga_xkb_keyboards_t *piga_xkb_get_keyboards() {
+    if (piga_keyboards == NULL) {
+        piga_keyboards = malloc(sizeof(piga_xkb_keyboards_t));
+    } else {
+        return piga_keyboards;
+    }
+
+    piga_keyboards->keyboards = NULL;
 
     // Try to find the correct directory of the layouts.
     const char *symbols_path = get_xkb_symbols_path();
-
-    // How many layouts will there be?
-    layouts.size = get_number_of_type_in_dir(symbols_path, DT_REG);
-    layouts.layouts = malloc(layouts.size * sizeof(char *));
 
     DIR *          d;
     struct dirent *dir;
     d = opendir(symbols_path);
 
     size_t name_length;
-    size_t i = 0;
+
+    piga_xkb_keyboard_t *keyboard = NULL;
 
     if (d) {
         while ((dir = readdir(d)) != NULL) {
@@ -60,27 +67,65 @@ piga_xkb_layouts_t piga_xkb_get_available_layouts() {
 #else
                 name_length = dir->d_namelen;
 #endif
-                layouts.layouts[i] = malloc(
-                    (name_length + 1) * sizeof(char)); // Add the 0-terminator.
-                memcpy(layouts.layouts[i], dir->d_name, name_length);
-                layouts.layouts[i][name_length] = '\0';
+                piga_xkb_keyboard_t *next_keyboard =
+                    malloc(sizeof(piga_xkb_keyboard_t));
+                if (piga_keyboards->keyboards == NULL)
+                    piga_keyboards->keyboards = next_keyboard;
+                else
+                    keyboard->next = next_keyboard;
+                keyboard = next_keyboard;
 
-                ++i;
+                // Name
+                keyboard->name = malloc((name_length + 1) *
+                                        sizeof(char)); // Add the 0-terminator.
+                memcpy(keyboard->name, dir->d_name, name_length);
+                keyboard->name[name_length] = '\0';
+
+                // Filename
+                size_t filename_length = strlen(symbols_path) + name_length;
+                keyboard->filename = malloc(filename_length + 1);
+                memcpy(keyboard->filename, symbols_path, strlen(symbols_path));
+                strcat(keyboard->filename, keyboard->name);
+
+                // Next keyboard.
+                keyboard->next = NULL;
             }
         }
     }
 
     closedir(d);
 
-    return layouts;
+    return piga_keyboards;
 }
 
-void piga_xkb_free_layouts(piga_xkb_layouts_t *layouts) {
-    if (layouts != NULL) {
-        for (size_t i = 0; i < layouts->size; ++i) {
-            free(layouts->layouts[i]);
-        }
+piga_xkb_keys_t *piga_xkb_get_keys_for_keyboard(piga_xkb_keyboard_t *board) {
+    piga_xkb_keys_t *   keys = malloc(sizeof(piga_xkb_keys_t));
+    struct xkb_context *ctx = NULL;
+    struct xkb_keymap * keymap = NULL;
+    ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    if (!ctx) {
+        printf("Could not create libxkbcommon context!\n");
+        goto CLEANUP;
     }
-}
 
-piga_xkb_keys_t *piga_xkb_get_keys_for_layout(const char *layout) {}
+    FILE *file = fopen(board->filename, "r");
+    if (!file) {
+        printf("Could not open symbols file \"%s\"!\n", board->filename);
+        goto CLEANUP;
+    }
+
+    keymap = xkb_keymap_new_from_file(ctx, file, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    if (!keymap) {
+        printf("Could not compile symbols file \"%s\"!\n", board->filename);
+    }
+
+    fclose(file);
+
+CLEANUP:
+    if (keymap)
+        xkb_keymap_unref(keymap);
+    if (ctx)
+        xkb_context_unref(ctx);
+
+    return keys;
+}

@@ -20,17 +20,14 @@ local options = dofile(optionsScript)
 print("Using options \"" .. options.name .. "\"")
 
 -- Global overlay objects
-local keyboard = Keyboard:new()
-local settings = Settings:new()
+local keyboard = Keyboard:new({}, options)
+local settings = Settings:new({}, options)
 
 -- Global overlay state
 local requestRedraw = true
 
 -- Conversion functions.
 local toKeyEv = ffi.typeof("piga_key_event_t *")
-
-local x = 0
-local y = 0
 
 local drawSettings = false
 local drawKeyboard = false
@@ -86,12 +83,12 @@ function shouldConsumeKeyEvent(e)
     end
 
     if drawSettings then
-	if settings.shouldConsumeKeyEvent(e) then
+	if settings:shouldConsumeKeyEvent(e) then
 	    return true
 	end
     end
     if drawKeyboard then
-	if keyboard.shouldConsumeKeyEvent(e) then
+	if keyboard:shouldConsumeKeyEvent(e) then
 	    return true
 	end
     end
@@ -119,6 +116,10 @@ function needsRedraw()
     return false
 end
 
+function init()
+
+end
+
 function draw()
     -- Test the overlay functions.
 
@@ -128,11 +129,11 @@ function draw()
     --end
 
     if drawSettings then
-	settings.draw()
+	settings:draw()
     end
     
     if drawKeyboard then
-	keyboard.draw()
+	keyboard:draw()
     end
     
     --[[

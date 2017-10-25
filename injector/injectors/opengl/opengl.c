@@ -508,6 +508,9 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
         piga_opengl_check_for_errors("Un-Bind VAO");
 
         gl_all_initialized = true;
+
+        // Refresh Lua for new window defaults from OpenGL.
+        piga_injector_refresh_lua();
     }
  
     piga_injector_draw();

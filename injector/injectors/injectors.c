@@ -158,9 +158,6 @@ struct piga_injector_handle_t *piga_injector_init() {
     printf("Loading X11 from %s\n", injector_handle->libXlib_path);
     piga_load_x_events(injector_handle->libXlib_path);
 
-    // Add the main lua file.
-    piga_injector_refresh_lua(path);
-
     // Setup hot-reloading.
     if (injector_handle->use_reloading) {
         injector_handle->inotify_fd = inotify_init1(IN_NONBLOCK);
@@ -264,6 +261,16 @@ void piga_injector_refresh_lua() {
     }
     free(main_file);
 
+    // Set other globals.
+    piga_lua_set_global_int(injector_handle->L,
+                            injector_handle->window_width, "WIDTH");
+    piga_lua_set_global_int(injector_handle->L,
+                            injector_handle->window_height, "HEIGHT");
+
+    // Set the global Lua cairo context variable.
+    lua_pushlightuserdata(injector_handle->L, injector_handle->cairo_cr);
+    lua_setglobal(injector_handle->L, "ctx");
+
     // Run the GC
     lua_gc(injector_handle->L, LUA_GCCOLLECT, 0);
 }
@@ -304,12 +311,6 @@ void piga_injector_draw() {
         // Set the global Lua cairo context variable.
         lua_pushlightuserdata(injector_handle->L, injector_handle->cairo_cr);
         lua_setglobal(injector_handle->L, "ctx");
-
-        // Set other globals.
-        piga_lua_set_global_int(injector_handle->L,
-                                injector_handle->window_width, "WIDTH");
-        piga_lua_set_global_int(injector_handle->L,
-                                injector_handle->window_height, "HEIGHT");
     }
 
     // Begin drawing.

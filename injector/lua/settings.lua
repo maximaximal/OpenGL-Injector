@@ -19,6 +19,13 @@ function settings:draw()
 end
 
 function settings:shouldConsumeKeyEvent(e)
+    if e.key == self.options.up or
+	e.key == self.options.down or
+	e.key == self.options.left or
+	e.key == self.options.right
+    then
+	return true
+    end
     return false
 end
 
@@ -37,10 +44,13 @@ function settings:needsRedraw()
     return false
 end
 
-function settings:new(o)
+function settings:new(o, options)
     o = o or {}
     setmetatable(o, self)
     self.__index = self 
+
+    self.options = options
+    
     return o
 end
 

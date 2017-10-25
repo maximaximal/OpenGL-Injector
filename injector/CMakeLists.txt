@@ -59,6 +59,7 @@ ExternalProject_Add(project_luajit
 
 ExternalProject_Get_Property(project_luajit install_dir)
 add_library(luajit STATIC IMPORTED)
+add_dependencies(luajit project_luajit)
 set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libluajit-5.1.a)
 target_link_libraries(piga-injector luajit)
 target_include_directories(piga-injector PRIVATE ${install_dir}/include/luajit-2.0)

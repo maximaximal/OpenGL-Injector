@@ -1,4 +1,4 @@
-project(piga-injector C)
+project(injector C)
 
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_AUTORCC OFF)
@@ -12,33 +12,28 @@ file(GLOB_RECURSE LUA_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/lua/*.lua)
 
 include(GenerateExportHeader)
 
-add_library(piga-injector SHARED ${INJECTORS_SRCS})
+add_library(injector SHARED ${INJECTORS_SRCS})
 
-target_include_directories(piga-injector PRIVATE ${FONTCONFIG_INCLUDE_DIR})
+target_include_directories(injector PRIVATE ${FONTCONFIG_INCLUDE_DIR})
 
-set_target_properties(piga-injector PROPERTIES LINK_SEARCH_START_STATIC 1)
-set_target_properties(piga-injector PROPERTIES LINK_SEARCH_END_STATIC 1)
+set_target_properties(injector PROPERTIES LINK_SEARCH_START_STATIC 1)
+set_target_properties(injector PROPERTIES LINK_SEARCH_END_STATIC 1)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 
-# Find Lua
-find_package(Lua REQUIRED)
-
 set(CMAKE_EXE_LINKER_FLAGS " -static")
-target_link_libraries(piga-injector -static-libgcc -static-libstdc++ m)
+target_link_libraries(injector -static-libgcc -static-libstdc++ m)
 
-generate_export_header(piga-injector)
-set_property(TARGET piga-injector PROPERTY POSITION_INDEPENDENT_CODE ON)
-set_property(TARGET piga-injector PROPERTY C_STANDARD_REQUIRED 11)
+generate_export_header(injector)
+set_property(TARGET injector PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET injector PROPERTY C_STANDARD_REQUIRED 11)
 
-target_include_directories(piga-injector PRIVATE ${X11_INCLUDE_DIR})
-
-target_include_directories(piga-injector PRIVATE ${PIGA_INCLUDE_DIRS})
+target_include_directories(injector PRIVATE ${X11_INCLUDE_DIR})
 
 add_custom_command(
-    TARGET piga-injector
+    TARGET injector
     DEPENDS ${LUA_SCRIPTS}
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_BINARY_DIR}/piga-injector/lua/)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_BINARY_DIR}/opengl-injector/lua/)
 
 # External Projects. Make compiling as fast as possible using processor count.
 include(ProcessorCount)
@@ -61,8 +56,8 @@ ExternalProject_Get_Property(project_luajit install_dir)
 add_library(luajit STATIC IMPORTED)
 add_dependencies(luajit project_luajit)
 set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libluajit-5.1.a)
-target_link_libraries(piga-injector luajit)
-target_include_directories(piga-injector PRIVATE ${install_dir}/include/luajit-2.0)
+target_link_libraries(injector luajit)
+target_include_directories(injector PRIVATE ${install_dir}/include/luajit-2.0)
 
 ExternalProject_Add(project_pixman
     URL ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/pixman-0.34.0.tar.gz
@@ -78,7 +73,7 @@ ExternalProject_Add(project_pixman
 ExternalProject_Get_Property(project_pixman install_dir)
 add_library(pixman STATIC IMPORTED)
 set_property(TARGET pixman PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libpixman-1.a)
-target_include_directories(piga-injector PRIVATE ${install_dir}/include/pixman)
+target_include_directories(injector PRIVATE ${install_dir}/include/pixman)
 
 ExternalProject_Add(project_cairo
     URL ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/cairo-1.14.8.tar.xz
@@ -94,9 +89,9 @@ ExternalProject_Add(project_cairo
 ExternalProject_Get_Property(project_cairo install_dir)
 add_library(cairo STATIC IMPORTED)
 set_property(TARGET cairo PROPERTY IMPORTED_LOCATION ${install_dir}/lib/libcairo.a)
-target_link_libraries(piga-injector cairo)
-target_link_libraries(piga-injector pixman)
-target_include_directories(piga-injector PRIVATE ${install_dir}/include)
+target_link_libraries(injector cairo)
+target_link_libraries(injector pixman)
+target_include_directories(injector PRIVATE ${install_dir}/include)
 
 add_dependencies(project_cairo project_pixman)
-add_dependencies(piga-injector project_cairo)
+add_dependencies(injector project_cairo)

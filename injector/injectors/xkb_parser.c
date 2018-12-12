@@ -18,7 +18,7 @@ const char *get_xkb_symbols_path() {
     return "";
 }
 
-piga_xkb_keyboards_t *piga_keyboards = NULL;
+injector_xkb_keyboards_t *injector_keyboards = NULL;
 
 size_t get_number_of_type_in_dir(const char *path, unsigned char type) {
     size_t         counter = 0;
@@ -39,14 +39,14 @@ size_t get_number_of_type_in_dir(const char *path, unsigned char type) {
     return counter;
 }
 
-piga_xkb_keyboards_t *piga_xkb_get_keyboards() {
-    if (piga_keyboards == NULL) {
-        piga_keyboards = malloc(sizeof(piga_xkb_keyboards_t));
+injector_xkb_keyboards_t *injector_xkb_get_keyboards() {
+    if (injector_keyboards == NULL) {
+        injector_keyboards = malloc(sizeof(injector_xkb_keyboards_t));
     } else {
-        return piga_keyboards;
+        return injector_keyboards;
     }
 
-    piga_keyboards->keyboards = NULL;
+    injector_keyboards->keyboards = NULL;
 
     // Try to find the correct directory of the layouts.
     const char *symbols_path = get_xkb_symbols_path();
@@ -57,7 +57,7 @@ piga_xkb_keyboards_t *piga_xkb_get_keyboards() {
 
     size_t name_length;
 
-    piga_xkb_keyboard_t *keyboard = NULL;
+    injector_xkb_keyboard_t *keyboard = NULL;
 
     if (d) {
         while ((dir = readdir(d)) != NULL) {
@@ -67,10 +67,10 @@ piga_xkb_keyboards_t *piga_xkb_get_keyboards() {
 #else
                 name_length = dir->d_namelen;
 #endif
-                piga_xkb_keyboard_t *next_keyboard =
-                    malloc(sizeof(piga_xkb_keyboard_t));
-                if (piga_keyboards->keyboards == NULL)
-                    piga_keyboards->keyboards = next_keyboard;
+                injector_xkb_keyboard_t *next_keyboard =
+                    malloc(sizeof(injector_xkb_keyboard_t));
+                if (injector_keyboards->keyboards == NULL)
+                    injector_keyboards->keyboards = next_keyboard;
                 else
                     keyboard->next = next_keyboard;
                 keyboard = next_keyboard;
@@ -95,11 +95,11 @@ piga_xkb_keyboards_t *piga_xkb_get_keyboards() {
 
     closedir(d);
 
-    return piga_keyboards;
+    return injector_keyboards;
 }
 
-piga_xkb_keys_t *piga_xkb_get_keys_for_keyboard(piga_xkb_keyboard_t *board) {
-    piga_xkb_keys_t *   keys = malloc(sizeof(piga_xkb_keys_t));
+injector_xkb_keys_t *injector_xkb_get_keys_for_keyboard(injector_xkb_keyboard_t *board) {
+    injector_xkb_keys_t *   keys = malloc(sizeof(injector_xkb_keys_t));
     struct xkb_context *ctx = NULL;
     struct xkb_keymap * keymap = NULL;
     ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);

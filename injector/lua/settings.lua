@@ -3,7 +3,7 @@ local overlay = require "ffi.overlay"
 
 local settings = {
     requestRedraw = false,
-    keyboards = overlay.piga_xkb_get_keyboards()
+    keyboards = overlay.injector_xkb_get_keyboards()
 }
 
 function settings:draw()

@@ -6,7 +6,7 @@
 
 void *fontconfig_handle = 0;
 
-void piga_load_fontconfig(const char *path) {
+void injector_load_fontconfig(const char *path) {
     if (path != 0) {
         if (fontconfig_handle == 0) {
             fontconfig_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);

@@ -167,7 +167,7 @@ static void resetGLState() {
 
     // Buffer State
     glActiveTexture_ptr(stateBank->activeTexture);
-    piga_opengl_check_for_errors("1");
+    injector_check_for_errors("1");
     glBindVertexArray_ptr(stateBank->vertexArrayBinding);
     glBindBuffer_ptr(GL_PIXEL_UNPACK_BUFFER,
                      stateBank->pixelUnpackBufferBinding);
@@ -213,10 +213,10 @@ static void resetGLState() {
 }
 
 void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
-    struct piga_injector_handle_t *handle = piga_injector_init();
+    struct injector_handle_t *handle = injector_init();
 
     if (handle->use_reloading) {
-        piga_injector_check_inotify();
+        injector_check_inotify();
     }
 
     if (handle->window_width == 0) {
@@ -227,16 +227,16 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
     }
 
     // Receive the right glXSwapBuffers library.
-    if (opengl_glx_handle == 0) {
-        opengl_glx_handle = dlopen(handle->libGLX_path, RTLD_LAZY);
+    if (injector_glx_handle == 0) {
+        injector_glx_handle = dlopen(handle->libGLX_path, RTLD_LAZY);
         printf("Opened real libGLX.\n");
     }
 
     if (glXSwapBuffers_ptr == 0) {
-        glXSwapBuffers_ptr = dlsym(opengl_glx_handle, "glXSwapBuffers");
-        glXGetProcAddress_ptr = dlsym(opengl_glx_handle, "glXGetProcAddress");
+        glXSwapBuffers_ptr = dlsym(injector_glx_handle, "glXSwapBuffers");
+        glXGetProcAddress_ptr = dlsym(injector_glx_handle, "glXGetProcAddress");
         glXGetCurrentContext_ptr =
-            dlsym(opengl_glx_handle, "glXGetCurrentContext");
+            dlsym(injector_glx_handle, "glXGetCurrentContext");
         printf("Read glXSwapBuffers and glXGetProcAddress ptr from libGLX.\n");
     }
 
@@ -394,7 +394,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
     }
 
     normalizeGLState();
-    piga_opengl_check_for_errors("Normalize GL-State");
+    injector_check_for_errors("Normalize GL-State");
 
     if (!gl_shader_initialized) {
         // Check the version.
@@ -404,27 +404,27 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
         printf("GL-Version: %i.%i\n", major, minor);
 
         gl_vertex_shader =
-            piga_opengl_make_shader(GL_VERTEX_SHADER, handle->vertex_shader);
-        piga_opengl_check_for_errors("Make Vertex Shader");
+            injector_make_shader(GL_VERTEX_SHADER, handle->vertex_shader);
+        injector_check_for_errors("Make Vertex Shader");
 
-        gl_fragment_shader = piga_opengl_make_shader(GL_FRAGMENT_SHADER,
+        gl_fragment_shader = injector_make_shader(GL_FRAGMENT_SHADER,
                                                      handle->fragment_shader);
-        piga_opengl_check_for_errors("Make Fragment Shader");
+        injector_check_for_errors("Make Fragment Shader");
 
         gl_shader_initialized = true;
     }
 
     if (gl_shader_initialized && !gl_program_initialized) {
         gl_program =
-            piga_opengl_make_program(gl_vertex_shader, gl_fragment_shader);
-        piga_opengl_check_for_errors("Make Program");
+            injector_make_program(gl_vertex_shader, gl_fragment_shader);
+        injector_check_for_errors("Make Program");
 
-        if (!piga_opengl_link_program(gl_program)) {
+        if (!injector_link_program(gl_program)) {
             printf("Could not link program!");
         } else {
             printf("Read shaders and linked program (%i).\n", gl_program);
         }
-        piga_opengl_check_for_errors("Link Program");
+        injector_check_for_errors("Link Program");
 
         gl_program_initialized = true;
     }
@@ -432,15 +432,15 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
     if (!gl_all_initialized) {
         // Assign a texture.
         glGenTextures_ptr(1, &gl_texture);
-        piga_opengl_check_for_errors("Gen-Texture");
+        injector_check_for_errors("Gen-Texture");
         glBindTexture_ptr(GL_TEXTURE_2D, gl_texture);
-        piga_opengl_check_for_errors("Bind-Texture");
+        injector_check_for_errors("Bind-Texture");
 
         glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri_ptr(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        piga_opengl_check_for_errors("Texture Properties");
+        injector_check_for_errors("Texture Properties");
 
         printf("Window Width: %i\n", handle->window_width);
         printf("Window Height: %i\n", handle->window_height);
@@ -448,86 +448,86 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
         glTexImage2D_ptr(GL_TEXTURE_2D, 0, GL_RGBA, handle->window_width,
                          handle->window_height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
                          handle->cairo_data);
-        piga_opengl_check_for_errors("Create Texture with Data");
+        injector_check_for_errors("Create Texture with Data");
 
         glBindTexture_ptr(GL_TEXTURE_2D, 0);
-        piga_opengl_check_for_errors("Un-Bind Texture");
+        injector_check_for_errors("Un-Bind Texture");
 
         // Generate the VAO.
         glGenVertexArrays_ptr(1, &gl_vao);
-        piga_opengl_check_for_errors("Generate VAO.");
+        injector_check_for_errors("Generate VAO.");
         glBindVertexArray_ptr(gl_vao);
-        piga_opengl_check_for_errors("Bind VAO.");
+        injector_check_for_errors("Bind VAO.");
 
         // Generate the VBOs.
         glGenBuffers_ptr(2, gl_vbo);
-        piga_opengl_check_for_errors("Generate 2 VBOs");
+        injector_check_for_errors("Generate 2 VBOs");
 
         // Bind the square.
         glBindBuffer_ptr(GL_ARRAY_BUFFER, gl_vbo[0]);
-        piga_opengl_check_for_errors("Bind vertices buffer.");
+        injector_check_for_errors("Bind vertices buffer.");
         glBufferData_ptr(GL_ARRAY_BUFFER, sizeof(squareVertices),
                          squareVertices, GL_STATIC_DRAW);
-        piga_opengl_check_for_errors("Fill vertices buffer.");
+        injector_check_for_errors("Fill vertices buffer.");
         glVertexAttribPointer_ptr(
             glGetAttribLocation_ptr(gl_program, "position"), 2, GL_FLOAT,
             GL_FALSE, 0, 0);
         GLint position = glGetAttribLocation_ptr(gl_program, "position");
 
         if (position != -1) {
-            piga_opengl_check_for_errors("Define attrib for vertices buffer.");
+            injector_check_for_errors("Define attrib for vertices buffer.");
             glEnableVertexAttribArray_ptr(
                 glGetAttribLocation_ptr(gl_program, "position"));
-            piga_opengl_check_for_errors("Enable attrib for vertices buffer.");
+            injector_check_for_errors("Enable attrib for vertices buffer.");
             glBindBuffer_ptr(GL_ARRAY_BUFFER, gl_vbo[0]);
-            piga_opengl_check_for_errors("Re-Bind vertices buffer.");
+            injector_check_for_errors("Re-Bind vertices buffer.");
         } else {
             printf("No position attribute found!\n");
         }
 
         // Bind the texture coords.
         glBindBuffer_ptr(GL_ARRAY_BUFFER, gl_vbo[1]);
-        piga_opengl_check_for_errors("Bind texcoords buffer.");
+        injector_check_for_errors("Bind texcoords buffer.");
         glBufferData_ptr(GL_ARRAY_BUFFER, sizeof(textureVertices),
                          textureVertices, GL_STATIC_DRAW);
-        piga_opengl_check_for_errors("Fill texcoord buffer.");
+        injector_check_for_errors("Fill texcoord buffer.");
 
         GLint texcoord = glGetAttribLocation_ptr(gl_program, "texcoord");
         if (texcoord != -1) {
             glVertexAttribPointer_ptr(texcoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
-            piga_opengl_check_for_errors("Define attrib texcoords buffer.");
+            injector_check_for_errors("Define attrib texcoords buffer.");
             glEnableVertexAttribArray_ptr(texcoord);
-            piga_opengl_check_for_errors("Enable attrib texcoords buffer.");
+            injector_check_for_errors("Enable attrib texcoords buffer.");
             glBindBuffer_ptr(GL_ARRAY_BUFFER, gl_vbo[1]);
-            piga_opengl_check_for_errors("Re-Bind texcoords buffer.");
+            injector_check_for_errors("Re-Bind texcoords buffer.");
         } else {
             printf("No texcoord attribute found!\n");
         }
 
         glBindVertexArray_ptr(0);
-        piga_opengl_check_for_errors("Un-Bind VAO");
+        injector_check_for_errors("Un-Bind VAO");
 
         gl_all_initialized = true;
 
         // Refresh Lua for new window defaults from OpenGL.
-        piga_injector_refresh_lua();
+        injector_refresh_lua();
     }
  
-    piga_injector_draw();
-    piga_opengl_check_for_errors("Piga Injector Draw");
+    injector_draw();
+    injector_check_for_errors("Piga Injector Draw");
 
     glUseProgram_ptr(gl_program);
-    piga_opengl_check_for_errors("Use Program (Draw)");
+    injector_check_for_errors("Use Program (Draw)");
     glBindVertexArray_ptr(gl_vao);
-    piga_opengl_check_for_errors("Bind VAO (Draw)");
+    injector_check_for_errors("Bind VAO (Draw)");
 
     // Update the texture.
     glBindTexture_ptr(GL_TEXTURE_2D, gl_texture);
-    piga_opengl_check_for_errors("Bind Texture (Draw)");
+    injector_check_for_errors("Bind Texture (Draw)");
     glActiveTexture_ptr(GL_TEXTURE0);
-    piga_opengl_check_for_errors("Active Texture (Draw)");
+    injector_check_for_errors("Active Texture (Draw)");
     if (handle->draw_request) {
-        piga_opengl_check_for_errors("Set Texture Stride (Draw)");
+        injector_check_for_errors("Set Texture Stride (Draw)");
         glTexSubImage2D_ptr(GL_TEXTURE_2D, 0, 0, 0, handle->window_width,
                             handle->window_height, GL_BGRA, GL_UNSIGNED_BYTE,
                             handle->cairo_data);
@@ -535,26 +535,26 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
 
     // A very good example (ES 2.0) is here: http://stackoverflow.com/a/4227878
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    piga_opengl_check_for_errors("Draw Arrays");
+    injector_check_for_errors("Draw Arrays");
 
     glBindVertexArray_ptr(0);
     glActiveTexture_ptr(GL_TEXTURE0);
     glBindTexture_ptr(GL_TEXTURE_2D, 0);
 
     glUseProgram_ptr(0);
-    piga_opengl_check_for_errors("Cleanup: Use Program 0");
+    injector_check_for_errors("Cleanup: Use Program 0");
     resetGLState();
-    piga_opengl_check_for_errors("Cleanup: Reset GL-State");
+    injector_check_for_errors("Cleanup: Reset GL-State");
 
     glXSwapBuffers_ptr(dpy, drawable);
-    piga_opengl_check_for_errors("GLX-SWAP BUFFERS");
+    injector_check_for_errors("GLX-SWAP BUFFERS");
 }
 
 EGLBoolean eglSwapBuffers(EGLDisplay display, EGLSurface surface) {
-    piga_injector_init();
+    injector_init();
 }
 
-PIGA_INJECTOR_EXPORT bool piga_opengl_check_for_errors(const char *msg) {
+INJECTOR_EXPORT bool injector_check_for_errors(const char *msg) {
     if (msg == 0)
         msg = "(No Message)";
 

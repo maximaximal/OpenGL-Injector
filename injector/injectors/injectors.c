@@ -17,19 +17,19 @@
 
 #include <cairo/cairo.h>
 
-struct piga_injector_handle_t *injector_handle = NULL;
+struct injector_handle_t *injector_handle = NULL;
 
 #define CHECK_AND_RETURN(PATH)                                                 \
     if (access(PATH "/lua/config.lua", R_OK) != -1)                            \
     return PATH
 
-const char *piga_injector_get_script_path() {
-    char *env_path = getenv("PIGA_INJECTOR_PATH");
+const char *injector_get_script_path() {
+    char *env_path = getenv("INJECTOR_PATH");
     if (env_path != 0) {
         injector_handle->use_reloading = true;
         return env_path;
     } else {
-        printf("No \"PIGA_INJECTOR_PATH\" environment variable found. Using "
+        printf("No \"INJECTOR_PATH\" environment variable found. Using "
                "default directories.\n");
     }
 
@@ -39,24 +39,24 @@ const char *piga_injector_get_script_path() {
     return 0;
 }
 
-const char *piga_injector_get_program_config() {
-    char *env_path = getenv("PIGA_INJECTOR_PROGRAM_CONFIG");
+const char *injector_get_program_config() {
+    char *env_path = getenv("INJECTOR_PROGRAM_CONFIG");
     if (env_path != 0) {
         return env_path;
     }
-    printf("No \"PIGA_INJECTOR_PROGRAM_CONFIG\" environment variable found. "
+    printf("No \"INJECTOR_PROGRAM_CONFIG\" environment variable found. "
            "Using default program config without specific configuration "
            "options.\n");
     return "";
 }
 
-struct piga_injector_handle_t *piga_injector_init() {
+struct injector_handle_t *injector_init() {
     if (injector_handle != 0) {
         return injector_handle;
     }
 
     // Initialize the handle.
-    injector_handle = malloc(sizeof(struct piga_injector_handle_t));
+    injector_handle = malloc(sizeof(struct injector_handle_t));
     injector_handle->libGL_path = 0;
     injector_handle->libGLX_path = 0;
     injector_handle->libXlib_path = 0;
@@ -76,27 +76,27 @@ struct piga_injector_handle_t *piga_injector_init() {
     injector_handle->inotify_ev_buf =
         calloc(injector_handle->inotify_ev_buf_size, sizeof(char));
 
-    global_piga_injector_handle = injector_handle;
+    global_injector_handle = injector_handle;
 
     injector_handle->L = luaL_newstate();
     if (!injector_handle->L) {
         printf("Error while trying to open lua state!\n");
-        injector_handle->status |= PIGA_INJECTOR_INVALID_LUA_STATE;
+        injector_handle->status |= INJECTOR_INVALID_LUA_STATE;
         return injector_handle;
     }
 
     luaL_openlibs(injector_handle->L);
 
-    const char *path = piga_injector_get_script_path();
+    const char *path = injector_get_script_path();
     if (path == 0) {
         printf("No script path found, injector not working.\n");
-        injector_handle->status |= PIGA_INJECTOR_INVALID_SCRIPT_PATH;
+        injector_handle->status |= INJECTOR_INVALID_SCRIPT_PATH;
         return injector_handle;
     }
     printf("Injector using path \"%s\"\n", path);
     injector_handle->path = path;
 
-    injector_handle->watched_path = piga_injector_combine_path(path, "/lua/");
+    injector_handle->watched_path = injector_combine_path(path, "/lua/");
 
     // Setup lua global variables.
     lua_pushstring(injector_handle->L, path);
@@ -105,17 +105,17 @@ struct piga_injector_handle_t *piga_injector_init() {
     lua_setglobal(injector_handle->L, "SYSTEM_LIBDIR_PATH");
 
     // Look for program specific options.
-    const char * program_specific_options = piga_injector_get_program_config();
+    const char * program_specific_options = injector_get_program_config();
     lua_pushstring(injector_handle->L, program_specific_options);
     lua_setglobal(injector_handle->L, "OPTIONS_SCRIPT");
 
     // Read lua config file.
-    char *config_file = piga_injector_combine_path(path, "/lua/config.lua");
+    char *config_file = injector_combine_path(path, "/lua/config.lua");
     luaL_loadfile(injector_handle->L, config_file);
     int ret = lua_pcall(injector_handle->L, 0, 0, 0);
     if (ret != 0) {
         printf("%s\n", lua_tostring(injector_handle->L, -1));
-        injector_handle->status |= PIGA_INJECTOR_ERROR_IN_CONFIG_LUA;
+        injector_handle->status |= INJECTOR_ERROR_IN_CONFIG_LUA;
     }
 
     // Configuration variables.
@@ -133,7 +133,7 @@ struct piga_injector_handle_t *piga_injector_init() {
 
     const char *fontconfig_path =
         get_global_str(injector_handle->L, "libFontConfig_path");
-    piga_load_fontconfig(fontconfig_path);
+    injector_load_fontconfig(fontconfig_path);
 
     // Check the variables.
     if (injector_handle->libGL_path == 0) {
@@ -156,7 +156,7 @@ struct piga_injector_handle_t *piga_injector_init() {
 
     // Load X-Events.
     printf("Loading X11 from %s\n", injector_handle->libXlib_path);
-    piga_load_x_events(injector_handle->libXlib_path);
+    injector_load_x_events(injector_handle->libXlib_path);
 
     // Setup hot-reloading.
     if (injector_handle->use_reloading) {
@@ -202,7 +202,7 @@ struct piga_injector_handle_t *piga_injector_init() {
     return injector_handle;
 }
 
-void piga_injector_check_inotify() {
+void injector_check_inotify() {
     ssize_t size =
         read(injector_handle->inotify_fd, injector_handle->inotify_ev_buf,
              injector_handle->inotify_ev_buf_size);
@@ -241,30 +241,30 @@ void piga_injector_check_inotify() {
         if (injector_handle->inotify_ev->mask & IN_MODIFY ||
             injector_handle->inotify_ev->mask & IN_CREATE ||
             injector_handle->inotify_ev->mask & IN_DELETE) {
-            piga_injector_refresh_lua();
+            injector_refresh_lua();
         }
     }
 }
 
-void piga_injector_refresh_lua() {
+void injector_refresh_lua() {
     // Load the overlay lua file.
     char *main_file =
-        piga_injector_combine_path(injector_handle->path, "/lua/overlay.lua");
+        injector_combine_path(injector_handle->path, "/lua/overlay.lua");
     luaL_loadfile(injector_handle->L, main_file);
     int ret = lua_pcall(injector_handle->L, 0, 0, 0);
     if (ret != 0) {
         printf("Error loading overlay.lua: %s\n",
                lua_tostring(injector_handle->L, -1));
-        injector_handle->status |= PIGA_INJECTOR_ERROR_IN_OVERLAY_LUA;
+        injector_handle->status |= INJECTOR_ERROR_IN_OVERLAY_LUA;
     } else {
         printf("Successfully loaded overlay.lua.\n");
     }
     free(main_file);
 
     // Set other globals.
-    piga_lua_set_global_int(injector_handle->L,
+    injector_lua_set_global_int(injector_handle->L,
                             injector_handle->window_width, "WIDTH");
-    piga_lua_set_global_int(injector_handle->L,
+    injector_lua_set_global_int(injector_handle->L,
                             injector_handle->window_height, "HEIGHT");
 
     // Set the global Lua cairo context variable.
@@ -275,7 +275,7 @@ void piga_injector_refresh_lua() {
     lua_gc(injector_handle->L, LUA_GCCOLLECT, 0);
 }
 
-void piga_injector_draw() {
+void injector_draw() {
     if (injector_handle->cairo_surface == 0) {
         // Allocate the cairo data array.
         injector_handle->cairo_stride = cairo_format_stride_for_width(
@@ -317,7 +317,7 @@ void piga_injector_draw() {
 
     // Call Lua to draw the overlay according to the current state of the
     // console.
-    if (piga_lua_call_bool_func(injector_handle->L, "needsRedraw")) {
+    if (injector_lua_call_bool_func(injector_handle->L, "needsRedraw")) {
         // Make the background transparent
         cairo_save(injector_handle->cairo_cr);
         cairo_set_operator(injector_handle->cairo_cr, CAIRO_OPERATOR_SOURCE);
@@ -325,7 +325,7 @@ void piga_injector_draw() {
         cairo_paint(injector_handle->cairo_cr);
         cairo_restore(injector_handle->cairo_cr);
 
-        piga_lua_call_void_func(injector_handle->L, "draw");
+        injector_lua_call_void_func(injector_handle->L, "draw");
 
         cairo_surface_flush(injector_handle->cairo_surface);
 
@@ -333,7 +333,7 @@ void piga_injector_draw() {
     }
 }
 
-char *piga_injector_combine_path(const char *p1, const char *p2) {
+char *injector_combine_path(const char *p1, const char *p2) {
     const size_t len_p1 = strlen(p1);
     const size_t len_p2 = strlen(p2);
     char *       str = malloc(len_p1 + len_p2 + 1);
@@ -342,7 +342,7 @@ char *piga_injector_combine_path(const char *p1, const char *p2) {
     return str;
 }
 
-void piga_injector_exit() {
+void injector_exit() {
     if (injector_handle != 0) {
         if (injector_handle->L != 0) {
             lua_close(injector_handle->L);
@@ -364,7 +364,7 @@ void piga_injector_exit() {
     }
 }
 
-char *piga_read_file(const char *path, size_t *length) {
+char *injector_read_file(const char *path, size_t *length) {
     // Thanks to http://stackoverflow.com/a/174552 for this handy stub.
     char *buffer = 0;
     FILE *f = fopen(path, "rb");

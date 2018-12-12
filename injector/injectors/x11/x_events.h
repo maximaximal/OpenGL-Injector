@@ -12,56 +12,56 @@
  * (MIT-License)
  */
 
-PIGA_OVERRIDE_SYMBOL(XNextEvent, int, (Display * dpy, XEvent *event));
+INJECTOR_OVERRIDE_SYMBOL(XNextEvent, int, (Display * dpy, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XPeekEvent, int, (Display * dpy, XEvent *event));
+INJECTOR_OVERRIDE_SYMBOL(XPeekEvent, int, (Display * dpy, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XWindowEvent,
+INJECTOR_OVERRIDE_SYMBOL(XWindowEvent,
                      int,
                      (Display * dpy, Window w, long mask, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XCheckWindowEvent,
+INJECTOR_OVERRIDE_SYMBOL(XCheckWindowEvent,
                      Bool,
                      (Display * dpy, Window w, long mask, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XMaskEvent,
+INJECTOR_OVERRIDE_SYMBOL(XMaskEvent,
                      int,
                      (Display * dpy, long mask, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XCheckMaskEvent,
+INJECTOR_OVERRIDE_SYMBOL(XCheckMaskEvent,
                      Bool,
                      (Display * dpy, long mask, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XCheckTypedEvent,
+INJECTOR_OVERRIDE_SYMBOL(XCheckTypedEvent,
                      Bool,
                      (Display * dpy, int type, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XCheckTypedWindowEvent,
+INJECTOR_OVERRIDE_SYMBOL(XCheckTypedWindowEvent,
                      Bool,
                      (Display * dpy, Window w, int type, XEvent *event));
 
-PIGA_OVERRIDE_SYMBOL(XIfEvent,
+INJECTOR_OVERRIDE_SYMBOL(XIfEvent,
                      int,
                      (Display * dpy,
                       XEvent *event,
                       Bool (*predicate)(Display *, XEvent *, XPointer),
                       XPointer arg));
 
-PIGA_OVERRIDE_SYMBOL(XCheckIfEvent,
+INJECTOR_OVERRIDE_SYMBOL(XCheckIfEvent,
                      Bool,
                      (Display * dpy,
                       XEvent *event,
                       Bool (*predicate)(Display *, XEvent *, XPointer),
                       XPointer arg));
 
-PIGA_OVERRIDE_SYMBOL(XPeekIfEvent,
+INJECTOR_OVERRIDE_SYMBOL(XPeekIfEvent,
                      int,
                      (Display * dpy,
                       XEvent *event,
                       Bool (*predicate)(Display *, XEvent *, XPointer),
                       XPointer arg));
 
-PIGA_OVERRIDE_SYMBOL(XPending, int, (Display * dpy));
+INJECTOR_OVERRIDE_SYMBOL(XPending, int, (Display * dpy));
 
-void *piga_x_events_handle;
-PIGA_INJECTOR_NO_EXPORT void piga_load_x_events(const char *path);
+void *injector_x_events_handle;
+INJECTOR_NO_EXPORT void injector_load_x_events(const char *path);

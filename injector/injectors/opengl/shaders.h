@@ -1,11 +1,11 @@
 #pragma once
 
 #include "opengl.h"
-#include <piga-injector_export.h>
+#include <injector_export.h>
 #include <stdbool.h>
 
-PIGA_INJECTOR_NO_EXPORT GLuint piga_opengl_make_shader(GLenum      type,
+INJECTOR_NO_EXPORT GLuint injector_make_shader(GLenum      type,
                                                        const char *path);
-PIGA_INJECTOR_NO_EXPORT GLuint piga_opengl_make_program(GLuint vertex_shader,
+INJECTOR_NO_EXPORT GLuint injector_make_program(GLuint vertex_shader,
                                                         GLuint fragment_shader);
-PIGA_INJECTOR_NO_EXPORT bool piga_opengl_link_program(GLuint program);
+INJECTOR_NO_EXPORT bool injector_link_program(GLuint program);

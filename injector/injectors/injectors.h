@@ -8,16 +8,16 @@
 
 #include <cairo/cairo.h>
 
-#include <piga-injector_export.h>
+#include <injector_export.h>
 
-enum piga_injector_status_t {
-    PIGA_INJECTOR_INVALID_LUA_STATE = 1 << 0,
-    PIGA_INJECTOR_INVALID_SCRIPT_PATH = 1 << 1,
-    PIGA_INJECTOR_ERROR_IN_CONFIG_LUA = 1 << 2,
-    PIGA_INJECTOR_ERROR_IN_OVERLAY_LUA = 1 << 3,
+enum injector_status_t {
+    INJECTOR_INVALID_LUA_STATE = 1 << 0,
+    INJECTOR_INVALID_SCRIPT_PATH = 1 << 1,
+    INJECTOR_ERROR_IN_CONFIG_LUA = 1 << 2,
+    INJECTOR_ERROR_IN_OVERLAY_LUA = 1 << 3,
 };
 
-struct piga_injector_handle_t {
+struct injector_handle_t {
     const char *libGL_path;
     const char *libGLX_path;
     const char *libXlib_path;
@@ -49,21 +49,21 @@ struct piga_injector_handle_t {
     size_t                inotify_ev_buf_size;
 };
 
-struct piga_injector_handle_t *global_piga_injector_handle;
+struct injector_handle_t *global_injector_handle;
 
-PIGA_INJECTOR_NO_EXPORT char *piga_injector_combine_path(const char *p1,
+INJECTOR_NO_EXPORT char *injector_combine_path(const char *p1,
                                                          const char *p2);
 
-PIGA_INJECTOR_NO_EXPORT const char *piga_injector_get_script_path();
+INJECTOR_NO_EXPORT const char *injector_get_script_path();
 
-PIGA_INJECTOR_NO_EXPORT struct piga_injector_handle_t *piga_injector_init();
+INJECTOR_NO_EXPORT struct injector_handle_t *injector_init();
 
-PIGA_INJECTOR_NO_EXPORT void piga_injector_check_inotify();
+INJECTOR_NO_EXPORT void injector_check_inotify();
 
-PIGA_INJECTOR_NO_EXPORT void piga_injector_refresh_lua();
+INJECTOR_NO_EXPORT void injector_refresh_lua();
 
-PIGA_INJECTOR_NO_EXPORT void piga_injector_draw();
+INJECTOR_NO_EXPORT void injector_draw();
 
-void PIGA_INJECTOR_NO_EXPORT piga_injector_exit();
+void INJECTOR_NO_EXPORT injector_exit();
 
-PIGA_INJECTOR_NO_EXPORT char *piga_read_file(const char *path, size_t *length);
+INJECTOR_NO_EXPORT char *injector_read_file(const char *path, size_t *length);

@@ -27,7 +27,7 @@ local settings = Settings:new({}, options)
 local requestRedraw = true
 
 -- Conversion functions.
-local toKeyEv = ffi.typeof("piga_key_event_t *")
+local toKeyEv = ffi.typeof("injector_key_event_t *")
 
 local drawSettings = false
 local drawKeyboard = false

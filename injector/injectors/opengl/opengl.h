@@ -4,7 +4,7 @@
 #include <GL/glx.h>
 #include <stdbool.h>
 
-#include <piga-injector_export.h>
+#include <injector_export.h>
 
 typedef void (*glXSwapBuffers_ptr_t)(Display *dpy, GLXDrawable);
 typedef void *(*glXGetProcAddress_ptr_t)(const GLubyte *procName);
@@ -117,7 +117,7 @@ typedef void (*glVertexAttribPointer_ptr_t)(GLuint        index,
                                             const GLvoid *pointer);
 typedef void (*glEnableVertexAttribArray_ptr_t)(GLuint index);
 
-void *opengl_glx_handle;
+void *injector_glx_handle;
 
 glXSwapBuffers_ptr_t       glXSwapBuffers_ptr;
 glXGetProcAddress_ptr_t    glXGetProcAddress_ptr;
@@ -248,9 +248,9 @@ struct GLStateBank {
 
 struct GLStateBank *stateBank;
 
-void PIGA_INJECTOR_EXPORT glXSwapBuffers(Display *dpy, GLXDrawable drawable);
+void INJECTOR_EXPORT glXSwapBuffers(Display *dpy, GLXDrawable drawable);
 
-EGLBoolean PIGA_INJECTOR_EXPORT eglSwapBuffers(EGLDisplay display,
+EGLBoolean INJECTOR_EXPORT eglSwapBuffers(EGLDisplay display,
                                                EGLSurface surface);
 
-PIGA_INJECTOR_EXPORT bool piga_opengl_check_for_errors();
+INJECTOR_EXPORT bool injector_check_for_errors();

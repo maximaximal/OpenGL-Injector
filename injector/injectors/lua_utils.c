@@ -12,14 +12,14 @@ const char *get_global_str(lua_State *L, const char *varname) {
     return str;
 }
 
-void piga_lua_call_void_func(lua_State *L, const char *func) {
+void injector_lua_call_void_func(lua_State *L, const char *func) {
     lua_getglobal(L, func);
 
     if (lua_pcall(L, 0, 0, 0) != 0) {
         printf("error running function `%s': %s\n", func, lua_tostring(L, -1));
     }
 }
-void piga_lua_call_void_func_light_userdata(lua_State *L, const char *func, void *userdata)
+void injector_lua_call_void_func_light_userdata(lua_State *L, const char *func, void *userdata)
 {
     lua_getglobal(L, func);
 
@@ -29,7 +29,7 @@ void piga_lua_call_void_func_light_userdata(lua_State *L, const char *func, void
         printf("error running function `%s': %s\n", func, lua_tostring(L, -1));
     }
 }
-bool piga_lua_call_bool_func_light_userdata(lua_State *L, const char *func, void *userdata)
+bool injector_lua_call_bool_func_light_userdata(lua_State *L, const char *func, void *userdata)
 {
     lua_getglobal(L, func);
 
@@ -48,7 +48,7 @@ bool piga_lua_call_bool_func_light_userdata(lua_State *L, const char *func, void
 
     return result;
 }
-bool piga_lua_call_bool_func(lua_State *L, const char *func) {
+bool injector_lua_call_bool_func(lua_State *L, const char *func) {
     lua_getglobal(L, func);
 
     if (lua_pcall(L, 0, 1, 0) != 0) {
@@ -65,7 +65,7 @@ bool piga_lua_call_bool_func(lua_State *L, const char *func) {
     return result;
 }
 
-void piga_lua_set_global_int(lua_State *L, int num, const char *name) {
+void injector_lua_set_global_int(lua_State *L, int num, const char *name) {
     lua_pushinteger(L, num);
     lua_setglobal(L, name);
 }

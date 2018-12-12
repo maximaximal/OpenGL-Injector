@@ -37,7 +37,7 @@
 #include "utils.h"
 #include "context.h"
 
-// For piga_injector_get_script_path()
+// For injector_get_script_path()
 #include "../injectors.h"
 
 /**
@@ -91,7 +91,7 @@ xkb_context_include_path_append_default(struct xkb_context *ctx)
     if (root != NULL)
        ret |= xkb_context_include_path_append(ctx, root);
     else
-        ret |= xkb_context_include_path_append(ctx, piga_injector_get_script_path());
+        ret |= xkb_context_include_path_append(ctx, injector_get_script_path());
 
     home = secure_getenv("HOME");
     if (!home)
@@ -274,7 +274,7 @@ xkb_context_new(enum xkb_context_flags flags)
     if (!(flags & XKB_CONTEXT_NO_DEFAULT_INCLUDES) &&
         !xkb_context_include_path_append_default(ctx)) {
         log_err(ctx, "failed to add default include path %s\n",
-                piga_injector_get_script_path());
+                injector_get_script_path());
         xkb_context_unref(ctx);
         return NULL;
     }

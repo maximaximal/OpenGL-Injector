@@ -14,7 +14,7 @@ local function generateKeys()
 end
 
 function keyboard:draw()
-    cr.cairo_set_source_rgba(ctx, 1, 1, 1, 0.5)
+    cr.cairo_set_source_rgba(ctx, 1, 1, 0, 0.8)
     cr.cairo_select_font_face(ctx, "Inconsolata",
     cr.CAIRO_FONT_SLANT_NORMAL,
     cr.CAIRO_FONT_WEIGHT_BOLD);

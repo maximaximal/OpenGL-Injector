@@ -25,3 +25,22 @@ can be used inside of a Lua environment, running next to the normal program.
   - Capturing keyboard inputs and prohibiting them from being entered into the game.
   - Possible application in the future: OCR of OpenGL based applications to be read aloud to visually impaired people.
 
+## Running the injector
+
+    # Download the repository.
+    git clone https://github.com/maximaximal/opengl-injector.git
+	cd opengl-injector
+	
+	# Create directory and build project.
+	mkdir build
+	cd build
+	cmake ..
+	make -j4
+	
+	# Set environment variable on where to find scripts and run with preloaded library.
+	export INJECTOR_PATH=../injector
+	LD_PRELOAD="./injector/libinjector.so" glxgears
+
+Controls inside the application can be read in [injector/lua/options.lua](./injector/lua/options.lua).
+To sum up: Tab for showing "settings" screen, F1 for the "virtual keyboard". No actual functionality has
+been implemented for this demo.

@@ -34,28 +34,31 @@ Bool injector_x11_check_event(Display *display, XEvent *e, XPointer pointer) {
     switch (e->type) {
     case KeyPress:
         SETUP_KEY_EVENT(key_event, e, true);
-        result = injector_lua_call_bool_func_light_userdata(global_injector_handle->L,
-                                               "shouldConsumeKeyEvent", &key_event);
+        result = injector_lua_call_bool_func_light_userdata(
+            global_injector_handle->L, "shouldConsumeKeyEvent", &key_event);
         break;
     case KeyRelease:
         SETUP_KEY_EVENT(key_event, e, false);
-        result = injector_lua_call_bool_func_light_userdata(global_injector_handle->L,
-                                               "shouldConsumeKeyEvent", &key_event);
+        result = injector_lua_call_bool_func_light_userdata(
+            global_injector_handle->L, "shouldConsumeKeyEvent", &key_event);
         break;
     case MotionNotify:
         SETUP_MOTION_EVENT(motion_event, e);
-        result = injector_lua_call_bool_func_light_userdata(global_injector_handle->L,
-                                               "shouldConsumeMotionEvent", &motion_event);
+        result = injector_lua_call_bool_func_light_userdata(
+            global_injector_handle->L, "shouldConsumeMotionEvent",
+            &motion_event);
         break;
     case ButtonPress:
         SETUP_BUTTON_EVENT(button_event, e);
-        result = injector_lua_call_bool_func_light_userdata(global_injector_handle->L,
-                                               "shouldConsumeButtonEvent", &button_event);
+        result = injector_lua_call_bool_func_light_userdata(
+            global_injector_handle->L, "shouldConsumeButtonEvent",
+            &button_event);
         break;
     case ConfigureNotify:
         SETUP_WINDOW_EVENT(window_event, e);
-        result = injector_lua_call_bool_func_light_userdata(global_injector_handle->L,
-                                               "shouldConsumeWindowEvent", &window_event);
+        result = injector_lua_call_bool_func_light_userdata(
+            global_injector_handle->L, "shouldConsumeWindowEvent",
+            &window_event);
         break;
     }
 
@@ -69,27 +72,27 @@ Bool injector_x11_handle_event(XEvent *e) {
     case KeyPress:
         SETUP_KEY_EVENT(key_event, e, true);
         injector_lua_call_void_func_light_userdata(global_injector_handle->L,
-                                               "onKeyPress", &key_event);
+                                                   "onKeyPress", &key_event);
         break;
     case KeyRelease:
         SETUP_KEY_EVENT(key_event, e, false);
         injector_lua_call_void_func_light_userdata(global_injector_handle->L,
-                                               "onKeyRelease", &key_event);
+                                                   "onKeyRelease", &key_event);
         break;
     case MotionNotify:
         SETUP_MOTION_EVENT(motion_event, e);
-        injector_lua_call_void_func_light_userdata(global_injector_handle->L,
-                                               "onMotionNotify", &motion_event);
+        injector_lua_call_void_func_light_userdata(
+            global_injector_handle->L, "onMotionNotify", &motion_event);
         break;
     case ButtonPress:
         SETUP_BUTTON_EVENT(button_event, e);
-        injector_lua_call_void_func_light_userdata(global_injector_handle->L,
-                                               "onButtonPress", &button_event);
+        injector_lua_call_void_func_light_userdata(
+            global_injector_handle->L, "onButtonPress", &button_event);
         break;
     case ConfigureNotify:
         SETUP_WINDOW_EVENT(window_event, e);
-        injector_lua_call_void_func_light_userdata(global_injector_handle->L,
-                                               "onWindowEvent", &window_event);
+        injector_lua_call_void_func_light_userdata(
+            global_injector_handle->L, "onWindowEvent", &window_event);
         break;
     }
 

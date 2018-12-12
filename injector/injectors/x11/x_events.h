@@ -17,51 +17,51 @@ INJECTOR_OVERRIDE_SYMBOL(XNextEvent, int, (Display * dpy, XEvent *event));
 INJECTOR_OVERRIDE_SYMBOL(XPeekEvent, int, (Display * dpy, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XWindowEvent,
-                     int,
-                     (Display * dpy, Window w, long mask, XEvent *event));
+                         int,
+                         (Display * dpy, Window w, long mask, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XCheckWindowEvent,
-                     Bool,
-                     (Display * dpy, Window w, long mask, XEvent *event));
+                         Bool,
+                         (Display * dpy, Window w, long mask, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XMaskEvent,
-                     int,
-                     (Display * dpy, long mask, XEvent *event));
+                         int,
+                         (Display * dpy, long mask, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XCheckMaskEvent,
-                     Bool,
-                     (Display * dpy, long mask, XEvent *event));
+                         Bool,
+                         (Display * dpy, long mask, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XCheckTypedEvent,
-                     Bool,
-                     (Display * dpy, int type, XEvent *event));
+                         Bool,
+                         (Display * dpy, int type, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XCheckTypedWindowEvent,
-                     Bool,
-                     (Display * dpy, Window w, int type, XEvent *event));
+                         Bool,
+                         (Display * dpy, Window w, int type, XEvent *event));
 
 INJECTOR_OVERRIDE_SYMBOL(XIfEvent,
-                     int,
-                     (Display * dpy,
-                      XEvent *event,
-                      Bool (*predicate)(Display *, XEvent *, XPointer),
-                      XPointer arg));
+                         int,
+                         (Display * dpy,
+                          XEvent *event,
+                          Bool (*predicate)(Display *, XEvent *, XPointer),
+                          XPointer arg));
 
 INJECTOR_OVERRIDE_SYMBOL(XCheckIfEvent,
-                     Bool,
-                     (Display * dpy,
-                      XEvent *event,
-                      Bool (*predicate)(Display *, XEvent *, XPointer),
-                      XPointer arg));
+                         Bool,
+                         (Display * dpy,
+                          XEvent *event,
+                          Bool (*predicate)(Display *, XEvent *, XPointer),
+                          XPointer arg));
 
 INJECTOR_OVERRIDE_SYMBOL(XPeekIfEvent,
-                     int,
-                     (Display * dpy,
-                      XEvent *event,
-                      Bool (*predicate)(Display *, XEvent *, XPointer),
-                      XPointer arg));
+                         int,
+                         (Display * dpy,
+                          XEvent *event,
+                          Bool (*predicate)(Display *, XEvent *, XPointer),
+                          XPointer arg));
 
 INJECTOR_OVERRIDE_SYMBOL(XPending, int, (Display * dpy));
 
-void *injector_x_events_handle;
+void *                  injector_x_events_handle;
 INJECTOR_NO_EXPORT void injector_load_x_events(const char *path);

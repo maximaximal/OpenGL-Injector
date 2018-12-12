@@ -27,4 +27,5 @@ typedef struct injector_motion_event_t {
 } injector_motion_event_t;
 
 INJECTOR_NO_EXPORT Bool injector_x11_handle_event(XEvent *e);
-INJECTOR_NO_EXPORT int injector_x11_check_event(Display *display, XEvent *e, XPointer pointer);
+INJECTOR_NO_EXPORT int
+injector_x11_check_event(Display *display, XEvent *e, XPointer pointer);

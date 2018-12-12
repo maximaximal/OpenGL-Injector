@@ -407,8 +407,8 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
             injector_make_shader(GL_VERTEX_SHADER, handle->vertex_shader);
         injector_check_for_errors("Make Vertex Shader");
 
-        gl_fragment_shader = injector_make_shader(GL_FRAGMENT_SHADER,
-                                                     handle->fragment_shader);
+        gl_fragment_shader =
+            injector_make_shader(GL_FRAGMENT_SHADER, handle->fragment_shader);
         injector_check_for_errors("Make Fragment Shader");
 
         gl_shader_initialized = true;
@@ -444,7 +444,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
 
         printf("Window Width: %i\n", handle->window_width);
         printf("Window Height: %i\n", handle->window_height);
-        
+
         glTexImage2D_ptr(GL_TEXTURE_2D, 0, GL_RGBA, handle->window_width,
                          handle->window_height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
                          handle->cairo_data);
@@ -512,7 +512,7 @@ void glXSwapBuffers(Display *dpy, GLXDrawable drawable) {
         // Refresh Lua for new window defaults from OpenGL.
         injector_refresh_lua();
     }
- 
+
     injector_draw();
     injector_check_for_errors("Piga Injector Draw");
 

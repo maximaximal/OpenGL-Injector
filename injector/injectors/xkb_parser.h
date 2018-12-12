@@ -11,23 +11,25 @@ typedef struct injector_xkb_key_t {
     uint32_t syms[4];
 } injector_xkb_key_t;
 
-typedef struct injector_xkb_skey_t { uint32_t sym; } injector_xkb_skey_t;
+typedef struct injector_xkb_skey_t {
+    uint32_t sym;
+} injector_xkb_skey_t;
 
 typedef struct injector_xkb_keys_t {
     injector_xkb_key_t *AB;
-    size_t          AB_l;
+    size_t              AB_l;
 
     injector_xkb_key_t *AC;
-    size_t          AC_l;
+    size_t              AC_l;
 
     injector_xkb_key_t *AD;
-    size_t          AD_l;
+    size_t              AD_l;
 
     injector_xkb_key_t *AE;
-    size_t          AE_l;
+    size_t              AE_l;
 
     injector_xkb_key_t *FK;
-    size_t          FK_l;
+    size_t              FK_l;
 
     injector_xkb_key_t  ESC;
     injector_xkb_key_t  TLDE;
@@ -63,4 +65,5 @@ typedef struct injector_xkb_keyboards_t {
 
 injector_xkb_keyboards_t *injector_xkb_get_keyboards();
 
-injector_xkb_keys_t *injector_xkb_get_keys_for_keyboard(injector_xkb_keyboard_t *board);
+injector_xkb_keys_t *
+injector_xkb_get_keys_for_keyboard(injector_xkb_keyboard_t *board);

@@ -251,6 +251,6 @@ struct GLStateBank *stateBank;
 void INJECTOR_EXPORT glXSwapBuffers(Display *dpy, GLXDrawable drawable);
 
 EGLBoolean INJECTOR_EXPORT eglSwapBuffers(EGLDisplay display,
-                                               EGLSurface surface);
+                                          EGLSurface surface);
 
 INJECTOR_EXPORT bool injector_check_for_errors();

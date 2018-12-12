@@ -51,8 +51,7 @@ struct injector_handle_t {
 
 struct injector_handle_t *global_injector_handle;
 
-INJECTOR_NO_EXPORT char *injector_combine_path(const char *p1,
-                                                         const char *p2);
+INJECTOR_NO_EXPORT char *injector_combine_path(const char *p1, const char *p2);
 
 INJECTOR_NO_EXPORT const char *injector_get_script_path();
 

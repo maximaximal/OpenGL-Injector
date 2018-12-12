@@ -33,8 +33,8 @@ const char *injector_get_script_path() {
                "default directories.\n");
     }
 
-    CHECK_AND_RETURN("piga-injector");
-    CHECK_AND_RETURN("~/.config/piga-injector");
+    CHECK_AND_RETURN("injector");
+    CHECK_AND_RETURN("~/.config/injector");
 
     return 0;
 }
@@ -105,7 +105,7 @@ struct injector_handle_t *injector_init() {
     lua_setglobal(injector_handle->L, "SYSTEM_LIBDIR_PATH");
 
     // Look for program specific options.
-    const char * program_specific_options = injector_get_program_config();
+    const char *program_specific_options = injector_get_program_config();
     lua_pushstring(injector_handle->L, program_specific_options);
     lua_setglobal(injector_handle->L, "OPTIONS_SCRIPT");
 
@@ -263,9 +263,9 @@ void injector_refresh_lua() {
 
     // Set other globals.
     injector_lua_set_global_int(injector_handle->L,
-                            injector_handle->window_width, "WIDTH");
+                                injector_handle->window_width, "WIDTH");
     injector_lua_set_global_int(injector_handle->L,
-                            injector_handle->window_height, "HEIGHT");
+                                injector_handle->window_height, "HEIGHT");
 
     // Set the global Lua cairo context variable.
     lua_pushlightuserdata(injector_handle->L, injector_handle->cairo_cr);

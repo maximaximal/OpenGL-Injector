@@ -98,10 +98,11 @@ injector_xkb_keyboards_t *injector_xkb_get_keyboards() {
     return injector_keyboards;
 }
 
-injector_xkb_keys_t *injector_xkb_get_keys_for_keyboard(injector_xkb_keyboard_t *board) {
-    injector_xkb_keys_t *   keys = malloc(sizeof(injector_xkb_keys_t));
-    struct xkb_context *ctx = NULL;
-    struct xkb_keymap * keymap = NULL;
+injector_xkb_keys_t *
+injector_xkb_get_keys_for_keyboard(injector_xkb_keyboard_t *board) {
+    injector_xkb_keys_t *keys = malloc(sizeof(injector_xkb_keys_t));
+    struct xkb_context * ctx = NULL;
+    struct xkb_keymap *  keymap = NULL;
     ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
     if (!ctx) {
         printf("Could not create libxkbcommon context!\n");
